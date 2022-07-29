@@ -1,0 +1,1520 @@
+USE [stock]
+GO
+/****** Object:  StoredProcedure [dbo].[fanpu]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE  PROCEDURE [dbo].[fanpu]
+(@days int)
+AS
+ BEGIN
+
+ --反扑
+ ;WITH A AS(
+SELECT * FROM dbo.lishijiage WHERE    EXISTS(SELECT 1 FROM dbo.VCalendar WHERE  row =@days  AND riqi=CDate)
+)
+,B AS(
+SELECT * FROM dbo.lishijiage WHERE    EXISTS(SELECT 1 FROM dbo.VCalendar WHERE   row=(@days-1) AND riqi=CDate)
+)
+SELECT   * FROM B INNER JOIN A ON B.code = A.code
+WHERE A.kai>A.shou  AND A.kai/1.02>A.shou   AND  ( A.shou>A.di*1.001 OR A.shou=A.di ) 
+AND  B.kai>=A.shou  AND B.kai<B.shou  AND (B.shou>=A.gao OR B.shou>=A.kai)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[guanchuan]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE  PROCEDURE [dbo].[guanchuan]
+(@days int)
+AS
+ BEGIN
+
+ --贯穿
+ ;WITH A AS(
+SELECT * FROM dbo.lishijiage WHERE    EXISTS(SELECT 1 FROM dbo.VCalendar WHERE  row =@days  AND riqi=CDate)
+)
+,B AS(
+SELECT * FROM dbo.lishijiage WHERE    EXISTS(SELECT 1 FROM dbo.VCalendar WHERE   row=(@days-1) AND riqi=CDate)
+)
+SELECT   * FROM B INNER JOIN A ON B.code = A.code
+WHERE A.kai>A.shou  AND A.kai/1.02>A.shou   AND  ( A.shou>A.di*1.001 OR A.shou=A.di ) 
+AND (B.kai<A.di OR B.kai< A.shou )    AND B.kai<B.shou AND (((A.kai-A.shou)/2)+A.shou)<B.shou
+END
+GO
+/****** Object:  StoredProcedure [dbo].[ruyanguichao]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE  PROCEDURE [dbo].[ruyanguichao]
+(@days int)
+AS
+ BEGIN
+
+ --乳燕归巢
+ ;WITH A AS(
+SELECT * FROM dbo.lishijiage WHERE    EXISTS(SELECT 1 FROM dbo.VCalendar WHERE  row =@days  AND riqi=CDate)
+)
+,B AS(
+SELECT * FROM dbo.lishijiage WHERE    EXISTS(SELECT 1 FROM dbo.VCalendar WHERE   row=(@days-1) AND riqi=CDate)
+)
+SELECT TOP 20 * FROM B INNER JOIN A ON B.code = A.code
+WHERE A.kai>A.shou AND A.shou/1.001>A.di AND  A.shou/1.009<A.di AND A.kai/1.02>A.shou AND A.kai/1.09<A.shou  
+AND B.kai>B.shou AND B.kai>A.gao AND B.shou>A.shou  
+
+END
+
+
+GO
+/****** Object:  StoredProcedure [dbo].[yunxian]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE  PROCEDURE [dbo].[yunxian]
+(@days int)
+AS
+ BEGIN
+
+ --孕线
+ ;WITH A AS(
+SELECT * FROM dbo.lishijiage WHERE    EXISTS(SELECT 1 FROM dbo.VCalendar WHERE  row =@days  AND riqi=CDate)
+)
+,B AS(
+SELECT * FROM dbo.lishijiage WHERE    EXISTS(SELECT 1 FROM dbo.VCalendar WHERE   row=(@days-1) AND riqi=CDate)
+)
+SELECT   * FROM B INNER JOIN A ON B.code = A.code
+WHERE A.kai>A.shou  AND A.kai/1.02>A.shou   AND  ( A.shou>A.di*1.001 OR A.shou=A.di ) 
+AND (B.kai>A.shou )    AND B.kai<B.shou AND (B.shou<A.gao OR B.shou<A.kai)
+END
+GO
+/****** Object:  StoredProcedure [dbo].[zaoyuxian]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE  PROCEDURE [dbo].[zaoyuxian]
+(@days int)
+AS
+ BEGIN
+
+ --遭遇线
+ ;WITH A AS(
+SELECT * FROM dbo.lishijiage WHERE    EXISTS(SELECT 1 FROM dbo.VCalendar WHERE  row =@days  AND riqi=CDate)
+)
+,B AS(
+SELECT * FROM dbo.lishijiage WHERE    EXISTS(SELECT 1 FROM dbo.VCalendar WHERE   row=(@days-1) AND riqi=CDate)
+)
+SELECT TOP 20 * FROM B INNER JOIN A ON B.code = A.code
+WHERE A.kai>A.shou AND A.shou/1.001>A.di AND  A.shou/1.009<A.di AND A.kai/1.02>A.shou AND A.kai/1.09<A.shou  
+AND B.kai*1.02<=A.di AND B.kai<B.shou AND B.shou*1.009>=A.shou  
+
+END
+
+
+CREATE TABLE [dbo].[lishidazongjiaoyi]
+(
+[code] [varchar] (10) COLLATE Chinese_PRC_CI_AS NULL,
+[name] [nvarchar] (20) COLLATE Chinese_PRC_CI_AS NULL,
+[CTime] [datetime] NOT NULL,
+cjj [nvarchar] (50) COLLATE Chinese_PRC_CI_AS NULL,
+cjje [nvarchar] (50) COLLATE Chinese_PRC_CI_AS NULL,
+cjl [nvarchar] (200) COLLATE Chinese_PRC_CI_AS NULL,
+buy [nvarchar] (200) COLLATE Chinese_PRC_CI_AS NULL,
+sale [nvarchar] (200) COLLATE Chinese_PRC_CI_AS NULL,
+sc [nvarchar] (200) COLLATE Chinese_PRC_CI_AS NULL
+) ON [PRIMARY]
+GO
+
+
+
+GO
+/****** Object:  Table [dbo].[Calendar]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Calendar](
+	[Days] [int] NOT NULL,
+	[CDate] [date] NOT NULL,
+	[Years] [int] NOT NULL,
+	[Months] [int] NOT NULL,
+	[Quarters] [int] NOT NULL,
+	[Periods] [int] NOT NULL,
+	[WeekID] [int] NOT NULL,
+	[WeekDayID] [int] NOT NULL,
+	[YearID] [int] NOT NULL,
+	[MonthID] [int] NOT NULL,
+	[DayID] [int] NOT NULL,
+	[QuarterID] [int] NOT NULL,
+	[DayOfYear] [int] NOT NULL,
+	[DayOfQuarter] [int] NOT NULL,
+	[Flag] [bit] NOT NULL,
+	[WorkdayFlag] [bit] NOT NULL,
+ CONSTRAINT [PK_Calendar] PRIMARY KEY CLUSTERED 
+(
+	[Days] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[dangrilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[dangrilonghubang](
+	[code] [varchar](10) NULL,
+	[CTime] [datetime] NOT NULL,
+	[url] [nvarchar](200) NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[GDZCCode]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[GDZCCode](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Code] [nvarchar](10) NOT NULL,
+	[Name] [nvarchar](50) NULL,
+	[CS] [int] NULL,
+	[RS] [int] NULL,
+	[Tag] [nvarchar](50) NULL,
+	[GS] [decimal](18, 5) NULL,
+	[SZ] [decimal](18, 5) NULL,
+ CONSTRAINT [PK_GDZCCode] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[IndividualStocks]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[IndividualStocks](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[Code] [nvarchar](20) NOT NULL,
+	[sq] [bit] NOT NULL,
+	[M1] [decimal](18, 5) NOT NULL,
+	[M2] [decimal](18, 5) NOT NULL,
+	[M3] [decimal](18, 5) NOT NULL,
+	[M4] [decimal](18, 5) NOT NULL,
+	[M5] [decimal](18, 5) NOT NULL,
+	[Z1] [decimal](18, 5) NOT NULL,
+	[Z2] [decimal](18, 5) NOT NULL,
+	[Z3] [decimal](18, 5) NOT NULL,
+	[Z4] [decimal](18, 5) NOT NULL,
+	[C1] [decimal](18, 5) NOT NULL,
+	[C2] [decimal](18, 5) NOT NULL,
+	[C3] [decimal](18, 5) NOT NULL,
+	[C4] [decimal](18, 5) NOT NULL,
+	[C10] [decimal](18, 5) NOT NULL,
+	[C20] [decimal](18, 5) NOT NULL,
+	[C30] [decimal](18, 5) NOT NULL,
+	[C40] [decimal](18, 5) NOT NULL,
+	[R1] [decimal](18, 5) NOT NULL,
+	[R2] [decimal](18, 5) NOT NULL,
+	[R3] [decimal](18, 5) NOT NULL,
+	[R4] [decimal](18, 5) NOT NULL,
+	[S1] [decimal](18, 5) NOT NULL,
+	[S2] [decimal](18, 5) NOT NULL,
+	[S3] [decimal](18, 5) NOT NULL,
+	[S4] [decimal](18, 5) NOT NULL,
+	[X1] [decimal](18, 0) NOT NULL,
+	[X2] [decimal](18, 0) NOT NULL,
+	[X3] [decimal](18, 0) NOT NULL,
+	[X4] [decimal](18, 0) NOT NULL,
+	[X5] [decimal](18, 0) NOT NULL,
+	[X6] [decimal](18, 0) NOT NULL,
+	[X7] [decimal](18, 0) NOT NULL,
+	[X8] [decimal](18, 0) NOT NULL,
+	[Y1] [decimal](18, 0) NOT NULL,
+	[Y2] [decimal](18, 0) NOT NULL,
+	[Y3] [decimal](18, 0) NOT NULL,
+	[Y4] [decimal](18, 0) NOT NULL,
+	[Y5] [decimal](18, 0) NOT NULL,
+	[Y6] [decimal](18, 0) NOT NULL,
+	[Y7] [decimal](18, 0) NOT NULL,
+	[Y8] [decimal](18, 0) NOT NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[IndividualStocksFull]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[IndividualStocksFull](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[Code] [nvarchar](20) NOT NULL,
+	[M1] [decimal](18, 5) NOT NULL,
+	[M2] [decimal](18, 5) NOT NULL,
+	[M3] [decimal](18, 5) NOT NULL,
+	[M4] [decimal](18, 5) NOT NULL,
+	[Z1] [decimal](18, 5) NOT NULL,
+	[Z2] [decimal](18, 5) NOT NULL,
+	[Z3] [decimal](18, 5) NOT NULL,
+	[Z4] [decimal](18, 5) NOT NULL,
+	[A1] [decimal](18, 5) NOT NULL,
+	[A2] [decimal](18, 5) NOT NULL,
+	[A3] [decimal](18, 5) NOT NULL,
+	[A4] [decimal](18, 5) NOT NULL,
+	[R1] [decimal](18, 5) NOT NULL,
+	[R2] [decimal](18, 5) NOT NULL,
+	[R3] [decimal](18, 5) NOT NULL,
+	[R4] [decimal](18, 5) NOT NULL,
+	[S1] [decimal](18, 5) NOT NULL,
+	[S2] [decimal](18, 5) NOT NULL,
+	[S3] [decimal](18, 5) NOT NULL,
+	[S4] [decimal](18, 5) NOT NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[lishijiage]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[lishijiage](
+	[code] [nvarchar](10) NOT NULL,
+	[riqi] [datetime] NULL,
+	[kai] [decimal](18, 2) NULL,
+	[shou] [decimal](18, 2) NULL,
+	[di] [decimal](18, 2) NULL,
+	[gao] [decimal](18, 2) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[lishilonghubang](
+	[code] [varchar](10) NULL,
+	[CTime] [datetime] NOT NULL,
+	[Trade] [nvarchar](50) NULL,
+	[Percent] [nvarchar](50) NULL,
+	[Sales] [nvarchar](200) NULL,
+	[content] [nvarchar](200) NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[main]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[main](
+	[name] [nvarchar](max) NULL,
+	[adress] [nvarchar](max) NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[PEGCode]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[PEGCode](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Code] [nvarchar](10) NOT NULL,
+	[PE] [decimal](18, 5) NULL,
+	[G] [decimal](18, 5) NULL,
+	[CTime] [datetime] NULL,
+ CONSTRAINT [PK_PEG] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[StockHolder]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[StockHolder](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Code] [nvarchar](10) NOT NULL,
+	[OrderID] [int] NULL,
+	[HolderName] [nvarchar](50) NULL,
+	[HolderName1] [nvarchar](50) NULL,
+	[HolderName2] [nvarchar](50) NULL,
+	[HolderName3] [nvarchar](50) NULL,
+	[HolderName4] [nvarchar](50) NULL,
+	[HolderName5] [nvarchar](50) NULL,
+	[HolderName10] [nvarchar](50) NULL,
+	[HolderName20] [nvarchar](50) NULL,
+	[HolderName30] [nvarchar](50) NULL,
+	[HolderName40] [nvarchar](50) NULL,
+	[HolderName50] [nvarchar](50) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[TEMPA100]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TEMPA100](
+	[code] [nvarchar](10) NOT NULL,
+	[riqi] [datetime] NULL,
+	[kai] [decimal](18, 2) NULL,
+	[shou] [decimal](18, 2) NULL,
+	[di] [decimal](18, 2) NULL,
+	[gao] [decimal](18, 2) NULL,
+	[row] [bigint] NULL,
+	[1dayriqi] [bigint] NULL,
+	[2dayriqi] [bigint] NULL,
+	[3dayriqi] [bigint] NULL,
+	[4dayriqi] [bigint] NULL,
+	[5dayriqi] [bigint] NULL,
+	[trade] [nvarchar](50) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[TEMPA99]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TEMPA99](
+	[code] [nvarchar](10) NOT NULL,
+	[riqi] [datetime] NULL,
+	[kai] [decimal](18, 2) NULL,
+	[shou] [decimal](18, 2) NULL,
+	[di] [decimal](18, 2) NULL,
+	[gao] [decimal](18, 2) NULL,
+	[row] [bigint] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[TEMPB]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TEMPB](
+	[code] [nvarchar](10) NOT NULL,
+	[riqi] [datetime] NULL,
+	[row] [bigint] NULL,
+	[5day] [bigint] NULL,
+	[10day] [bigint] NULL,
+	[20day] [bigint] NULL,
+	[60day] [bigint] NULL,
+	[shou] [decimal](18, 2) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[TEMPC]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[TEMPC](
+	[code] [varchar](10) NULL,
+	[CTime] [datetime] NOT NULL,
+	[Trade] [nvarchar](50) NULL,
+	[Percent] [nvarchar](50) NULL,
+	[Sales] [nvarchar](200) NULL,
+	[content] [nvarchar](200) NULL,
+	[riqi] [datetime] NULL,
+	[row] [bigint] NULL,
+	[5day] [bigint] NULL,
+	[10day] [bigint] NULL,
+	[20day] [bigint] NULL,
+	[60day] [bigint] NULL,
+	[shou] [decimal](18, 2) NULL,
+	[5dayshou] [decimal](18, 2) NULL,
+	[10dayshou] [decimal](18, 2) NULL,
+	[20dayshou] [decimal](18, 2) NULL,
+	[60dayshou] [decimal](18, 2) NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[TEMPD]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[TEMPD](
+	[5dayjia] [decimal](19, 2) NULL,
+	[10dayjia] [decimal](19, 2) NULL,
+	[20dayjia] [decimal](19, 2) NULL,
+	[60dayjia] [decimal](19, 2) NULL,
+	[code] [varchar](10) NULL,
+	[CTime] [datetime] NOT NULL,
+	[Trade] [nvarchar](50) NULL,
+	[Percent] [nvarchar](50) NULL,
+	[Sales] [nvarchar](200) NULL,
+	[content] [nvarchar](200) NULL,
+	[riqi] [datetime] NULL,
+	[row] [bigint] NULL,
+	[5day] [bigint] NULL,
+	[10day] [bigint] NULL,
+	[20day] [bigint] NULL,
+	[60day] [bigint] NULL,
+	[shou] [decimal](18, 2) NULL,
+	[5dayshou] [decimal](18, 2) NULL,
+	[10dayshou] [decimal](18, 2) NULL,
+	[20dayshou] [decimal](18, 2) NULL,
+	[60dayshou] [decimal](18, 2) NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[TEMPE]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[TEMPE](
+	[5daysheng] [int] NOT NULL,
+	[10daysheng] [int] NOT NULL,
+	[20daysheng] [int] NOT NULL,
+	[60daysheng] [int] NOT NULL,
+	[maimai] [int] NOT NULL,
+	[5dayjia] [decimal](19, 2) NULL,
+	[10dayjia] [decimal](19, 2) NULL,
+	[20dayjia] [decimal](19, 2) NULL,
+	[60dayjia] [decimal](19, 2) NULL,
+	[code] [varchar](10) NULL,
+	[CTime] [datetime] NOT NULL,
+	[Trade] [nvarchar](50) NULL,
+	[Percent] [nvarchar](50) NULL,
+	[Sales] [nvarchar](200) NULL,
+	[content] [nvarchar](200) NULL,
+	[riqi] [datetime] NULL,
+	[row] [bigint] NULL,
+	[5day] [bigint] NULL,
+	[10day] [bigint] NULL,
+	[20day] [bigint] NULL,
+	[60day] [bigint] NULL,
+	[shou] [decimal](18, 2) NULL,
+	[5dayshou] [decimal](18, 2) NULL,
+	[10dayshou] [decimal](18, 2) NULL,
+	[20dayshou] [decimal](18, 2) NULL,
+	[60dayshou] [decimal](18, 2) NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[TEMPFB]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[TEMPFB](
+	[5dayBsheng] [int] NULL,
+	[5daysheng] [int] NOT NULL,
+	[10daysheng] [int] NOT NULL,
+	[20daysheng] [int] NOT NULL,
+	[60daysheng] [int] NOT NULL,
+	[maimai] [int] NOT NULL,
+	[5dayjia] [decimal](19, 2) NULL,
+	[10dayjia] [decimal](19, 2) NULL,
+	[20dayjia] [decimal](19, 2) NULL,
+	[60dayjia] [decimal](19, 2) NULL,
+	[code] [varchar](10) NULL,
+	[CTime] [datetime] NOT NULL,
+	[Trade] [nvarchar](50) NULL,
+	[Percent] [nvarchar](50) NULL,
+	[Sales] [nvarchar](200) NULL,
+	[content] [nvarchar](200) NULL,
+	[riqi] [datetime] NULL,
+	[row] [bigint] NULL,
+	[5day] [bigint] NULL,
+	[10day] [bigint] NULL,
+	[20day] [bigint] NULL,
+	[60day] [bigint] NULL,
+	[shou] [decimal](18, 2) NULL,
+	[5dayshou] [decimal](18, 2) NULL,
+	[10dayshou] [decimal](18, 2) NULL,
+	[20dayshou] [decimal](18, 2) NULL,
+	[60dayshou] [decimal](18, 2) NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[TEMPFS]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[TEMPFS](
+	[5daySsheng] [int] NULL,
+	[5daysheng] [int] NOT NULL,
+	[10daysheng] [int] NOT NULL,
+	[20daysheng] [int] NOT NULL,
+	[60daysheng] [int] NOT NULL,
+	[maimai] [int] NOT NULL,
+	[5dayjia] [decimal](19, 2) NULL,
+	[10dayjia] [decimal](19, 2) NULL,
+	[20dayjia] [decimal](19, 2) NULL,
+	[60dayjia] [decimal](19, 2) NULL,
+	[code] [varchar](10) NULL,
+	[CTime] [datetime] NOT NULL,
+	[Trade] [nvarchar](50) NULL,
+	[Percent] [nvarchar](50) NULL,
+	[Sales] [nvarchar](200) NULL,
+	[content] [nvarchar](200) NULL,
+	[riqi] [datetime] NULL,
+	[row] [bigint] NULL,
+	[5day] [bigint] NULL,
+	[10day] [bigint] NULL,
+	[20day] [bigint] NULL,
+	[60day] [bigint] NULL,
+	[shou] [decimal](18, 2) NULL,
+	[5dayshou] [decimal](18, 2) NULL,
+	[10dayshou] [decimal](18, 2) NULL,
+	[20dayshou] [decimal](18, 2) NULL,
+	[60dayshou] [decimal](18, 2) NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[TEMPG]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[TEMPG](
+	[chuxiancishu] [int] NULL,
+	[5daysheng] [int] NOT NULL,
+	[10daysheng] [int] NOT NULL,
+	[20daysheng] [int] NOT NULL,
+	[60daysheng] [int] NOT NULL,
+	[maimai] [int] NOT NULL,
+	[5dayjia] [decimal](19, 2) NULL,
+	[10dayjia] [decimal](19, 2) NULL,
+	[20dayjia] [decimal](19, 2) NULL,
+	[60dayjia] [decimal](19, 2) NULL,
+	[code] [varchar](10) NULL,
+	[CTime] [datetime] NOT NULL,
+	[Trade] [nvarchar](50) NULL,
+	[Percent] [nvarchar](50) NULL,
+	[Sales] [nvarchar](200) NULL,
+	[content] [nvarchar](200) NULL,
+	[riqi] [datetime] NULL,
+	[row] [bigint] NULL,
+	[5day] [bigint] NULL,
+	[10day] [bigint] NULL,
+	[20day] [bigint] NULL,
+	[60day] [bigint] NULL,
+	[shou] [decimal](18, 2) NULL,
+	[5dayshou] [decimal](18, 2) NULL,
+	[10dayshou] [decimal](18, 2) NULL,
+	[20dayshou] [decimal](18, 2) NULL,
+	[60dayshou] [decimal](18, 2) NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[TEMPHB]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[TEMPHB](
+	[5dayBsheng] [int] NULL,
+	[5daysheng] [int] NOT NULL,
+	[10daysheng] [int] NOT NULL,
+	[20daysheng] [int] NOT NULL,
+	[60daysheng] [int] NOT NULL,
+	[maimai] [int] NOT NULL,
+	[5dayjia] [decimal](19, 2) NULL,
+	[10dayjia] [decimal](19, 2) NULL,
+	[20dayjia] [decimal](19, 2) NULL,
+	[60dayjia] [decimal](19, 2) NULL,
+	[code] [varchar](10) NULL,
+	[CTime] [datetime] NOT NULL,
+	[Trade] [nvarchar](50) NULL,
+	[Percent] [nvarchar](50) NULL,
+	[Sales] [nvarchar](200) NULL,
+	[content] [nvarchar](200) NULL,
+	[riqi] [datetime] NULL,
+	[row] [bigint] NULL,
+	[5day] [bigint] NULL,
+	[10day] [bigint] NULL,
+	[20day] [bigint] NULL,
+	[60day] [bigint] NULL,
+	[shou] [decimal](18, 2) NULL,
+	[5dayshou] [decimal](18, 2) NULL,
+	[10dayshou] [decimal](18, 2) NULL,
+	[20dayshou] [decimal](18, 2) NULL,
+	[60dayshou] [decimal](18, 2) NULL,
+	[chuxiancishu] [int] NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[tempStockHolder]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tempStockHolder](
+	[gudongchuxiancishu] [int] NULL,
+	[jijinchuxiancishu] [int] NULL,
+	[jijinchuxiancishu2] [int] NULL,
+	[jijinchuxiancishu3] [int] NULL,
+	[jijinchuxiancishu4] [int] NULL,
+	[jijinchuxiancishu5] [int] NULL,
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Code] [nvarchar](10) NOT NULL,
+	[OrderID] [int] NULL,
+	[HolderName] [nvarchar](50) NULL,
+	[HolderName1] [nvarchar](50) NULL,
+	[HolderName2] [nvarchar](50) NULL,
+	[HolderName3] [nvarchar](50) NULL,
+	[HolderName4] [nvarchar](50) NULL,
+	[HolderName5] [nvarchar](50) NULL,
+	[HolderName10] [nvarchar](50) NULL,
+	[HolderName20] [nvarchar](50) NULL,
+	[HolderName30] [nvarchar](50) NULL,
+	[HolderName40] [nvarchar](50) NULL,
+	[HolderName50] [nvarchar](50) NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[XDCode]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[XDCode](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Code] [nvarchar](10) NULL,
+	[CTime] [datetime] NULL,
+	[Mark] [nvarchar](800) NULL,
+	[LTime] [datetime] NULL,
+ CONSTRAINT [PK_DXCode] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[YJYZCode]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[YJYZCode](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[Code] [nvarchar](10) NOT NULL,
+	[Name] [nvarchar](800) NULL,
+	[CTime] [datetime] NULL,
+	[CTimeStr] [nvarchar](80) NULL,
+	[A] [decimal](18, 5) NULL,
+	[D] [decimal](18, 5) NULL,
+	[Remark] [nvarchar](800) NULL,
+ CONSTRAINT [PK_[YJYZCode] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  View [dbo].[VCalendar]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[VCalendar]
+AS
+    SELECT  * ,
+            ROW_NUMBER() OVER ( ORDER BY CDate ASC ) AS 'row'
+    FROM    dbo.Calendar
+    WHERE   CDate BETWEEN CONVERT(CHAR(10), DATEADD(day, -12000, GETDATE()), 120)
+                  AND     CONVERT(CHAR(10), DATEADD(day, -0, GETDATE()), 120)
+            AND WorkdayFlag = 1 
+
+GO
+/****** Object:  View [dbo].[Vlishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[Vlishilonghubang]
+AS 
+SELECT *,COUNT(1) OVER(PARTITION BY code) AS 'r1',COUNT(1) OVER (PARTITION BY CTime) AS 'r2' FROM dbo.lishilonghubang
+ 
+
+
+GO
+/****** Object:  View [dbo].[shangxia3]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ CREATE VIEW [dbo].[shangxia3]
+ AS
+ WITH T AS(
+
+SELECT lishijiage.* FROM dbo.Vlishilonghubang LEFT OUTER JOIN dbo.lishijiage ON  Vlishilonghubang.code = dbo.lishijiage.code AND riqi=CTime
+WHERE  CTime IN (SELECT   CDate FROM      dbo.VCalendar  ) AND val<11 
+ --AND Vlishilonghubang.code='002539'
+) 
+SELECT T.*   FROM T LEFT OUTER JOIN   dbo.lishijiage    as T2 ON T.code = T2.code 
+WHERE (T2.shou/T.shou)>0.3 OR T.shou/T2.shou<0.3
+
+GO
+/****** Object:  View [dbo].[shangxiakai1点3点]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ 
+CREATE VIEW [dbo].[shangxiakai1点3点]
+AS
+WITH T AS (
+SELECT  lishijiage.*,
+        CTime ,
+        TYPE ,
+        val ,
+        r1 ,
+        r2
+FROM    dbo.Vlishilonghubang LEFT OUTER JOIN dbo.lishijiage ON dbo.Vlishilonghubang.code = dbo.lishijiage.code AND dbo.Vlishilonghubang.CTime = dbo.lishijiage.riqi
+WHERE   CTime in ( SELECT    CDate
+                  FROM      dbo.VCalendar
+                  WHERE     row  BETWEEN 1 AND 60
+                )				 
+        AND val < 11
+		) 
+,T2 AS (
+		SELECT  
+        CTime ,
+        TYPE ,
+        val ,
+        T.shou AS LHshou,
+        T.kai AS LHkai, 
+        r1 ,
+        r2,  lishijiage.*,
+		ROW_NUMBER() OVER( PARTITION BY  lishijiage.code ORDER BY lishijiage.riqi DESC) AS rowid
+		 FROM T   LEFT OUTER JOIN dbo.lishijiage ON T.code = dbo.lishijiage.code AND dbo.lishijiage.riqi>=T.CTime
+		WHERE lishijiage.shou/1.001>=T.kai AND lishijiage.shou/1.01<=T.kai     
+		)
+,T3 AS 
+(
+	SELECT *,COUNT(1) OVER(PARTITION BY code)  AS cishu, ((SELECT row FROM dbo.VCalendar WHERE CDate=T2.CTime)-(SELECT row FROM dbo.VCalendar WHERE CDate=riqi))  AS  tianshu FROM T2  
+)
+ 
+ SELECT * FROM T3 WHERE rowid=1
+  
+GO
+/****** Object:  View [dbo].[shangxiashou1点3点]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ 
+CREATE VIEW [dbo].[shangxiashou1点3点]
+AS
+WITH T AS (
+SELECT  lishijiage.*,
+        CTime ,
+        TYPE ,
+        val ,
+        r1 ,
+        r2
+FROM    dbo.Vlishilonghubang LEFT OUTER JOIN dbo.lishijiage ON dbo.Vlishilonghubang.code = dbo.lishijiage.code AND dbo.Vlishilonghubang.CTime = dbo.lishijiage.riqi
+WHERE   CTime in ( SELECT    CDate
+                  FROM      dbo.VCalendar
+                  WHERE     row  BETWEEN 1 AND 60
+                )				 
+        AND val < 11
+		) 
+,T2 AS (
+		SELECT  
+        CTime ,
+        TYPE ,
+        val ,
+        T.shou AS LHshou,
+        T.kai AS LHkai, 
+        r1 ,
+        r2,  lishijiage.*,
+		ROW_NUMBER() OVER( PARTITION BY  lishijiage.code ORDER BY lishijiage.riqi DESC) AS rowid
+		 FROM T   LEFT OUTER JOIN dbo.lishijiage ON T.code = dbo.lishijiage.code AND dbo.lishijiage.riqi>=T.CTime
+		WHERE lishijiage.shou/1.001>=T.shou AND lishijiage.shou/1.01<=T.shou   
+		)
+,T3 AS 
+(
+	SELECT *,COUNT(1) OVER(PARTITION BY code)  AS cishu, ((SELECT row FROM dbo.VCalendar WHERE CDate=T2.CTime)-(SELECT row FROM dbo.VCalendar WHERE CDate=riqi))  AS  tianshu FROM T2  
+)
+ 
+ SELECT * FROM T3 WHERE rowid=1
+  
+GO
+/****** Object:  View [dbo].[vIndividualStocks]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ 
+CREATE VIEW [dbo].[vIndividualStocks]
+ AS 
+
+
+
+SELECT 
+code,sq,C1,C2,C3,C4,
+CASE WHEN C10<>0 THEN 
+(C1-C10)/ABS(C10)  ELSE NULL  END AS  当前季度每股收益同比增长,  
+CASE WHEN C20<>0 THEN 
+(C2-C20)/ABS(C20)  ELSE NULL  END AS  前一季度每股收益同比增长,
+CASE WHEN C30<>0 THEN 
+(C3-C30)/ABS(C30)  ELSE NULL  END AS  前二季度每股收益同比增长,
+CASE WHEN C40<>0 THEN 
+(C4-C40)/ABS(C40)  ELSE NULL  END AS  前三季度每股收益同比增长,
+
+CASE WHEN Y5<>0 THEN 
+((Y1-Y5)/ABS(Y5))*100  ELSE NULL  END AS  计算出当前季度净利润同比增长,  
+
+CASE WHEN Y6<>0 THEN 
+((Y2-Y6)/ABS(Y6))*100  ELSE NULL  END AS  计算出前一季度净利润同比增长,  
+
+
+CASE WHEN Y7<>0 THEN 
+((Y3-Y7)/ABS(Y7))*100  ELSE NULL  END AS  计算出前二季度净利润同比增长,
+
+CASE WHEN Y8<>0 THEN 
+((Y4-Y8)/ABS(Y8))*100  ELSE NULL  END AS  计算出前三季度净利润同比增长,
+
+
+CASE WHEN Y2<>0 THEN 
+((Y1-Y2)/ABS(Y2))*100  ELSE NULL  END AS  计算出当前季度净利润环比增长,  
+
+CASE WHEN Y3<>0 THEN 
+((Y2-Y3)/ABS(Y3))*100  ELSE NULL  END AS  计算出前一季度净利润环比增长,  
+
+
+CASE WHEN Y4<>0 THEN 
+((Y3-Y4)/ABS(Y4))*100  ELSE NULL  END AS  计算出前二季度净利润环比增长,
+
+CASE WHEN Y5<>0 THEN 
+((Y4-Y5)/ABS(Y5))*100  ELSE NULL  END AS  计算出前三季度净利润环比增长,
+
+
+M1 AS  当前季度净利润同比增长,  
+M2 AS  前一季度净利润同比增长,
+M3 AS  前二季度净利润同比增长,
+M4 AS  前三季度净利润同比增长,
+
+Z1 AS 当前季度营业收入同比增长,  
+Z2 AS  前一季度营业收入同比增长,
+Z3 AS  前二季度营业收入同比增长,
+Z4 AS  前三季度营业收入同比增长,
+CASE WHEN C1<>0 THEN 
+S1/ABS(C1) ELSE  NULL  END AS  当前季度每股现金流比每股收益,  
+CASE WHEN C2<>0 THEN 
+S2/ABS(C2) ELSE  NULL END  AS  前一季度每股现金流比每股收益,
+CASE WHEN C3<>0 THEN 
+S3/ABS(C3) ELSE  NULL END  AS  前二季度每股现金流比每股收益,
+CASE WHEN C4<>0 THEN 
+S4/ABS(C4 )ELSE  NULL  END AS  前三季度每股现金流比每股收益,
+
+R1 AS  当前季度净资产收益率,  
+R2 AS  前一季度净资产收益率,
+R3 AS  前二季度净资产收益率,
+R4 AS  前三季度净资产收益率
+
+FROM dbo.IndividualStocks   
+
+  
+
+--WHERE C1<>0 AND C2<>0 AND C3<>0 AND C4<>0 AND C10<>0 AND C20<>0 AND C30<>0 AND C40<>0
+
+
+
+
+
+
+
+
+
+
+
+
+GO
+/****** Object:  View [dbo].[vtzdck]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vtzdck]
+ AS 
+
+SELECT  vIndividualStocks.* FROM   dbo.vIndividualStocks 
+
+ WHERE  当前季度每股收益同比增长>0.4    AND  当前季度营业收入同比增长  > 50  AND 当前季度净利润同比增长>50    AND C1>0.2 AND sq=1
+
+
+
+
+
+
+
+GO
+/****** Object:  View [dbo].[VJYZYYWZZ]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[VJYZYYWZZ]
+AS 
+SELECT code,C1,当前季度净利润同比增长, 前一季度净利润同比增长,前二季度净利润同比增长,
+当前季度营业收入同比增长, 前一季度营业收入同比增长,前二季度营业收入同比增长,
+当前季度每股收益同比增长,前一季度每股收益同比增长,前二季度每股收益同比增长
+  FROM dbo.vIndividualStocks
+ WHERE 当前季度营业收入同比增长> 前一季度营业收入同比增长  AND 前一季度营业收入同比增长>0
+ AND  当前季度净利润同比增长 > 前一季度净利润同比增长  AND 前一季度净利润同比增长>0
+
+
+
+
+
+
+GO
+/****** Object:  View [dbo].[vIndividualStocksFull]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vIndividualStocksFull]
+AS
+SELECT     Code, CASE WHEN A2<>0 THEN (A1 - A2) / ABS(A2) ELSE NULL END AS 昨年年度每股收益同比增长, 
+CASE WHEN A3<>0 THEN
+(A2 - A3) / ABS(A3) ELSE NULL  END AS 前年年度每股收益同比增长,
+CASE WHEN A4<>0 THEN
+ (A3 - A4) / ABS(A4) ELSE NULL END AS 大前年年度每股收益同比增长, 
+                      M1 AS 昨年年度净利润同比增长, M2 AS 前年年度净利润同比增长, M3 AS 大前年年度净利润同比增长, Z1 AS 昨年年度营业收入同比增长, 
+                      Z2 AS 前年年度营业收入同比增长, Z3 AS 大前年年度营业收入同比增长,
+					  CASE WHEN A1<>0 THEN
+					   S1 / ABS(A1) ELSE NULL  END AS 昨年年度每股现金流比年度每股收益, 
+                     CASE WHEN A2<>0 THEN
+					  S2 / ABS(A2) ELSE NULL END  AS 前年年度每股现金流比年度每股收益, 
+					  CASE WHEN A3<>0 THEN
+					  S3 / ABS(A3) ELSE NULL END AS 大前年度每股现金流比年度每股收益, R1 AS 昨年年度净资产收益率, R2 AS 前年年度净资产收益率, 
+                      R3 AS 大前年年度净资产收益率
+FROM         dbo.IndividualStocksFull
+
+
+
+
+
+
+
+
+GO
+/****** Object:  View [dbo].[VNDMYSY]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW  [dbo].[VNDMYSY]
+AS 
+---年度每股收益
+SELECT * FROM dbo.vIndividualStocksFull WHERE 
+前年年度每股收益同比增长 >0 AND 
+ 昨年年度每股收益同比增长>前年年度每股收益同比增长
+ AND  昨年年度每股现金流比年度每股收益>0.2
+ AND 昨年年度净资产收益率>20
+
+
+
+
+
+GO
+/****** Object:  View [dbo].[vtzdck2]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vtzdck2]
+ AS 
+--1、 2015 年一季报净利润预增幅度下限超过 40%
+--2、 2014 年年报每股收益同比增长大于 20%
+--3、 2014 年年报 EPS 大于 0.2 元。
+--4、 2015 年一季报净利润预增幅度下限>2014 年一季报净利润增幅
+
+SELECT A,D,vIndividualStocks.* FROM dbo.vIndividualStocks  LEFT JOIN  dbo.YJYZCode  ON  dbo.vIndividualStocks.code = dbo.YJYZCode.Code
+ WHERE A>40 AND  A> 前三季度净利润同比增长 AND SQ=1 AND C1>0.2 AND 当前季度每股收益同比增长>0.2
+
+
+
+
+
+
+GO
+/****** Object:  View [dbo].[V0lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[V0lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 1) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V34lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[V34lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 34) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V55lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[V55lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 55) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V1lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[V1lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 1) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V2lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V2lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 2) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V3lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V3lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 3) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V4lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V4lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 4) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V5lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V5lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 5) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V6lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V6lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 6) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V7lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V7lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 7) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V8lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V8lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 8) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V9lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V9lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 9) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V10lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V10lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 10) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V11lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V11lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 11) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V12lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V12lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 12) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V13lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V13lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 13) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V14lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V14lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 14) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V15lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V15lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 15) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V21lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V21lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 21) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V22lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V22lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 22) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[V23lishilonghubang]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[V23lishilonghubang]
+as
+SELECT   code, CTime, TYPE, val, url, [content], r1, r2
+FROM      dbo.Vlishilonghubang
+WHERE   CTime =(SELECT   CDate FROM      dbo.VCalendar  WHERE row = 23) AND val<11
+ 
+
+GO
+/****** Object:  View [dbo].[VStockHolder]    Script Date: 2017/11/14 16:36:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[VStockHolder]
+AS  
+---基金独门股并且相同公司旗下基金超过1条 
+SELECT * FROM (
+SELECT ROW_NUMBER() OVER(PARTITION BY Code,HolderName10 ORDER BY code ) JiJingTiaoShu,  SUM(num) OVER(PARTITION BY Code  ) JiJIngZongShu,* FROM (
+SELECT ROW_NUMBER() OVER(PARTITION BY ID ORDER BY Code  ) num, code,HolderName10 FROM dbo.StockHolder 
+WHERE   HolderName10<>''
+
+ ) AS T ) AS T2
+ WHERE T2.JiJingTiaoShu=T2.JiJIngZongShu AND T2.JiJingTiaoShu>1
+
+
+
+
+
+
+
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPane1', @value=N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
+Begin DesignProperties = 
+   Begin PaneConfigurations = 
+      Begin PaneConfiguration = 0
+         NumPanes = 4
+         Configuration = "(H (1[40] 4[20] 2[20] 3) )"
+      End
+      Begin PaneConfiguration = 1
+         NumPanes = 3
+         Configuration = "(H (1 [50] 4 [25] 3))"
+      End
+      Begin PaneConfiguration = 2
+         NumPanes = 3
+         Configuration = "(H (1 [50] 2 [25] 3))"
+      End
+      Begin PaneConfiguration = 3
+         NumPanes = 3
+         Configuration = "(H (4 [30] 2 [40] 3))"
+      End
+      Begin PaneConfiguration = 4
+         NumPanes = 2
+         Configuration = "(H (1 [56] 3))"
+      End
+      Begin PaneConfiguration = 5
+         NumPanes = 2
+         Configuration = "(H (2 [66] 3))"
+      End
+      Begin PaneConfiguration = 6
+         NumPanes = 2
+         Configuration = "(H (4 [50] 3))"
+      End
+      Begin PaneConfiguration = 7
+         NumPanes = 1
+         Configuration = "(V (3))"
+      End
+      Begin PaneConfiguration = 8
+         NumPanes = 3
+         Configuration = "(H (1[56] 4[18] 2) )"
+      End
+      Begin PaneConfiguration = 9
+         NumPanes = 2
+         Configuration = "(H (1 [75] 4))"
+      End
+      Begin PaneConfiguration = 10
+         NumPanes = 2
+         Configuration = "(H (1[66] 2) )"
+      End
+      Begin PaneConfiguration = 11
+         NumPanes = 2
+         Configuration = "(H (4 [60] 2))"
+      End
+      Begin PaneConfiguration = 12
+         NumPanes = 1
+         Configuration = "(H (1) )"
+      End
+      Begin PaneConfiguration = 13
+         NumPanes = 1
+         Configuration = "(V (4))"
+      End
+      Begin PaneConfiguration = 14
+         NumPanes = 1
+         Configuration = "(V (2))"
+      End
+      ActivePaneConfig = 0
+   End
+   Begin DiagramPane = 
+      Begin Origin = 
+         Top = 0
+         Left = 0
+      End
+      Begin Tables = 
+         Begin Table = "IndividualStocksFull"
+            Begin Extent = 
+               Top = 6
+               Left = 38
+               Bottom = 125
+               Right = 180
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+      End
+   End
+   Begin SQLPane = 
+   End
+   Begin DataPane = 
+      Begin ParameterDefaults = ""
+      End
+   End
+   Begin CriteriaPane = 
+      Begin ColumnWidths = 11
+         Column = 1440
+         Alias = 900
+         Table = 1170
+         Output = 720
+         Append = 1400
+         NewValue = 1170
+         SortType = 1350
+         SortOrder = 1410
+         GroupBy = 1350
+         Filter = 1350
+         Or = 1350
+         Or = 1350
+         Or = 1350
+      End
+   End
+End
+' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vIndividualStocksFull'
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_DiagramPaneCount', @value=1 , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'VIEW',@level1name=N'vIndividualStocksFull'
+GO

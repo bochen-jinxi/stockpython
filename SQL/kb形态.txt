@@ -1,0 +1,84 @@
+declare @i int
+set @i=1
+while @i<3
+begin  
+ 
+ 
+ WITH T AS (SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi ASC) AS sort, (shou-kai)/kai AS kbzf, (shou-kai) AS kb, *  FROM dbo.lishijiager )
+,  T2 AS (
+SELECT A0.kbzf AS k0zf, A0.kb AS k0, A0.shou AS  k0s,A0.kai AS k0k,A0.di AS k0d,A0.gao AS k0g,
+A.kbzf AS k1zf, A.kb AS k1, A.shou AS  k1s,A.kai AS k1k,A.di AS k1d,A.gao AS k1g,
+ B.kbzf AS k2zf,  B.kb AS k2, B.shou AS  k2s,B.kai AS k2k,B.di AS k2d,B.gao AS k2g,
+A0.sort,A0.code,A0.riqi 
+  FROM T AS A  INNER JOIN  T AS A0 
+ON  A.sort=A0.sort+1  
+ AND A.code=A0.code
+INNER JOIN  T AS B
+ON  A.sort=B.sort-1  
+ AND A.code=B.code
+WHERE 
+A0.riqi='2021-04-01 00:00:00.000' and 
+ A0.sort =@i
+)
+
+SELECT * FROM T2 
+WHERE 1=1
+-- T2.k0>0 AND T2.k1>0 AND  T2.k2>0  AND T2.k0k<T2.k1k AND T2.k1d<T2.k0k AND T2.k1k<T2.k1s AND T2.k1g>T2.k1s AND T2.k1d<T2.k0k AND T2.k2k<T2.k2g AND T2.k2d<T2.k1s AND T2.k2g>T2.k1g
+--AND T2.k2zf>T2.k0zf AND T2.k2zf>T2.k1zf AND T2.k1zf>0 AND T2.k1zf>T2.k0zf AND T2.k0zf>0
+ AND  code LIKE 'sh.600000%' 
+ --AND T2.riqi='2021-04-12 00:00:00.000'  
+ 
+ 
+set @i=@i+1
+end
+
+ 
+
+-- SELECT * FROM  dbo.lishijiage WHERE code ='sz.002098' 
+
+
+-------==============================================================================
+-------------==================================================================
+----========================================================================
+------==================================================================
+----------=======================================================
+
+
+
+
+WITH T AS (SELECT ROW_NUMBER() OVER(PARTITION BY code,riqi ORDER BY pctChg ASC) AS sort, (shou-kai) AS kb, *  FROM dbo.lishijiage  )
+----1	-0.07	sz.002098	2021-04-12 00:00:00.000	6.22	6.15	6.13	6.22	127800.00	0.00
+----2	0.04	sz.002098	2021-04-12 00:00:00.000	6.15	6.19	6.15	6.19	74900.00	1.00
+----3	-0.01	sz.002098	2021-04-12 00:00:00.000	6.19	6.18	6.17	6.20	95000.00	2.00
+----4	-0.01	sz.002098	2021-04-12 00:00:00.000	6.18	6.17	6.17	6.19	56100.00	3.00
+----5	0.02	sz.002098	2021-04-12 00:00:00.000	6.17	6.19	6.16	6.19	57900.00	4.00
+----6	0.00	sz.002098	2021-04-12 00:00:00.000	6.19	6.19	6.18	6.20	39100.00	5.00
+----SELECT * FROM T WHERE riqi='2021-04-12 00:00:00.000'
+,  T2 AS (
+SELECT A.*, A.kb AS k1,  
+B.kb AS k2,
+C.kb AS k3,       
+D.kb AS k4,
+E.kb AS k5,
+F.kb AS k6
+  FROM T AS A  INNER JOIN  T AS B 
+ON  A.sort=B.sort-1  AND B.riqi='2021-04-12 00:00:00.000'
+INNER JOIN  T AS C
+ON  B.sort=C.sort-1   AND C.riqi='2021-04-12 00:00:00.000'
+INNER JOIN  T AS D
+ON  C.sort=D.sort-1 AND D.riqi='2021-04-12 00:00:00.000'
+INNER JOIN  T AS E
+ON  D.sort=E.sort-1 AND E.riqi='2021-04-12 00:00:00.000'
+INNER JOIN  T AS F
+ON  E.sort=F.sort-1 AND F.riqi='2021-04-12 00:00:00.000'
+WHERE A.sort =1
+AND A.riqi='2021-04-12 00:00:00.000'
+)
+
+SELECT * FROM T2 
+WHERE k1<0 AND  k1<k2 AND K2<k3 AND k3 >k4 AND k4<k5  AND k5>k6 AND  k6<0
+-- WHERE code LIKE 'sh.6%'
+
+ 
+
+-- SELECT * FROM  dbo.lishijiage WHERE code ='sz.002098' 
