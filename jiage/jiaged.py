@@ -25,7 +25,7 @@ with fileinput.input(files=('D:\code.EBK')) as f:
             # 分页查询，将每页信息合并在一起
             result_list.append(rs.get_row_data())
         for el in result_list:
-            pricedata= ";INSERT INTO dbo.lishijiager (code,riqi,kai,shou,di,gao,chengjiaoliang,pctChg) VALUES ('%s', '%s','%s',N'%s',N'%s',N'%s',N'%s',N'%s')" % (el[1], el[0],el[2],el[5],el[4],el[3],el[7] if len(el[7])>0 else 0,el[7] if len(el[7])>0 else 0)
+            pricedata= ";INSERT INTO dbo.lishijiager (code,riqi,kai,shou,di,gao,chengjiaoliang,pctChg) VALUES ('%s', '%s','%s',N'%s',N'%s',N'%s',N'%s',N'%s')" % (el[1], el[0],el[2],el[5],el[4],el[3],el[7] if len(el[7])>0 else 0,el[9] if len(el[9])>0 else 0)
             with open('D:\\k\\d' + str(i) + '.sql', 'a+') as f2:
                 f2.write(pricedata+'\n')
             #print(result_list[0])
