@@ -19,10 +19,7 @@
 			 BEGIN
        
 
-  WITH    T AS ( SELECT   ( CASE WHEN ( shou - kai ) > 0 THEN 1
-                               WHEN ( shou - kai ) = 0 THEN 0
-                               WHEN ( shou - kai ) < 0 THEN -1
-                          END ) AS zhangdie ,
+  WITH    T AS ( SELECT   pctChg AS zhangdie ,
                         ( shou - kai ) AS shiti ,
                         ( shou - kai ) / kai * 100 AS shitifudu ,
                         [code] ,
@@ -40,13 +37,13 @@
  ,      T2
           AS (
 		   --取上/下影线
-		   SELECT   ( CASE zhangdie
-                            WHEN 1 THEN ( gao - shou )
-                            WHEN -1 THEN ( kai - gao )
+		   SELECT   ( CASE 
+                            WHEN zhangdie>0 THEN ( gao - shou )
+                            WHEN zhangdie<=0 THEN ( kai - gao )
                           END ) AS shanyingxian ,
-                        ( CASE zhangdie
-                            WHEN 1 THEN ( kai - di )
-                            WHEN -1 THEN ( di - shou )
+                        ( CASE  
+                            WHEN zhangdie>0 THEN ( kai - di )
+                            WHEN zhangdie<=0 THEN ( di - shou )
                           END ) AS xiayingxian ,
                         *
                FROM     T
@@ -56,13 +53,13 @@
 		    --冲高回落/探底回升的比例 幅度
 		   SELECT   shanyingxian / shiti AS syxbst ,
                         xiayingxian / shiti AS xyxbst ,
-						( CASE zhangdie
-                            WHEN 1 THEN shanyingxian/shou
-                            WHEN -1 THEN shanyingxian/kai
+						( CASE  
+                            WHEN  zhangdie>0 THEN shanyingxian/shou
+                            WHEN zhangdie<=0 THEN shanyingxian/kai
                           END ) AS shangyingxianfudu ,
-                        ( CASE zhangdie
-                            WHEN 1 THEN xiayingxian/kai
-                            WHEN -1 THEN xiayingxian/shou
+                        ( CASE  
+                            WHEN  zhangdie>0 THEN xiayingxian/kai
+                            WHEN zhangdie<=0 THEN xiayingxian/shou
                           END ) AS xiayingxianfudu ,
                         ROW_NUMBER() OVER ( PARTITION BY code ORDER BY gao DESC ) AS RowID ,
 						

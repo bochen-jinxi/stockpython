@@ -6,10 +6,7 @@
 	  use stock 
    go 
 
-    --SELECT    ROW_NUMBER() OVER( PARTITION BY code ORDER BY riqi ASC) AS riqihao,*
-    --          INTO T90
-			 --  FROM     dbo.lishijiager
-			 -- WHERE  riqi >='2022-04-01' 
+
 
 			 DECLARE @i INT ;
 			 SET @i=(SELECT COUNT(1) FROM dbo.T90 WHERE  code ='sz.000001')
@@ -18,10 +15,7 @@
              --SELECT * FROM dbo.T90 WHERE riqihao<=@i
 			 
 
-WITH    T AS ( SELECT   riqihao,  ( CASE WHEN ( shou - kai ) > 0 THEN 1
-                               WHEN ( shou - kai ) = 0 THEN 0
-                               WHEN ( shou - kai ) < 0 THEN -1
-                          END ) AS zhangdie ,
+WITH    T AS ( SELECT   riqihao,  pctChg AS zhangdie ,
                         ( shou - kai ) AS shiti ,
                         ( shou - kai ) / kai * 100 AS shitifudu ,
                         [code] ,
@@ -41,13 +35,13 @@ WITH    T AS ( SELECT   riqihao,  ( CASE WHEN ( shou - kai ) > 0 THEN 1
   ,T2
           AS ( 
 		    --取上/下影线
-		  SELECT   ( CASE zhangdie
-                            WHEN 1 THEN ( gao - shou )
-                            WHEN -1 THEN ( kai - gao )
+		  SELECT   ( CASE 
+                            WHEN zhangdie >0 THEN ( gao - shou )
+                            WHEN zhangdie <=0 THEN ( kai - gao )
                           END ) AS shanyingxian ,
-                        ( CASE zhangdie
-                            WHEN 1 THEN ( kai - di )
-                            WHEN -1 THEN ( di - shou )
+                        ( CASE  
+                            WHEN zhangdie >0 THEN ( kai - di )
+                            WHEN zhangdie <=0 THEN ( di - shou )
                           END ) AS xiayingxian ,
                         *
                FROM     T
@@ -104,11 +98,11 @@ WITH    T AS ( SELECT   riqihao,  ( CASE WHEN ( shou - kai ) > 0 THEN 1
 		   --查找后续中所有阴线并重新按日期正序标号 用以查找连续日期号的阴线
 		   SELECT   riqihao
                         - ROW_NUMBER() OVER ( PARTITION BY code ORDER BY riqi ) AS lianxuxiadieriqizu , COUNT(1) OVER(PARTITION BY code) AS  yingxianshu,
-						(SELECT COUNT(1) FROM T6 AS A WHERE A.zhangdie=1 AND A.code=T6.code ) AS yangxianshu,
+						(SELECT COUNT(1) FROM T6 AS A WHERE A.zhangdie>0 AND A.code=T6.code ) AS yangxianshu,
                          *
                FROM     T6
                WHERE   --- code='sh.603985' AND   
-                        zhangdie = -1
+                        zhangdie <=0
              ),
         T8
           AS (
@@ -152,7 +146,7 @@ WITH    T AS ( SELECT   riqihao,  ( CASE WHEN ( shou - kai ) > 0 THEN 1
 		 FROM T10 INNER JOIN T6 ON  T10.code = T6.code
 		 WHERE  
 	     T10.riqihao+1=t6.riqihao 
-		 AND T10.zhangdie=-1  AND  ABS(T10.shitifudu)/(100/61.8)<T6.shitifudu
+		 AND T10.zhangdie<=0  AND  ABS(T10.shitifudu)/(100/61.8)<T6.shitifudu
 		  and T10.kai>=T6.shou	
 AND  T10.di*1.01>=T10.shou
 AND  T6.di*1.03>=T6.kai

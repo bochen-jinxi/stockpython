@@ -15,10 +15,7 @@
 			 SET @i=(SELECT COUNT(1) FROM dbo.T90 WHERE  code ='sz.000001')
 			 WHILE(@i>5)
 			 BEGIN
-WITH    T AS ( SELECT   ( CASE WHEN ( shou - kai ) > 0 THEN 1
-                               WHEN ( shou - kai ) = 0 THEN 0
-                               WHEN ( shou - kai ) < 0 THEN -1
-                          END ) AS zhangdie ,
+WITH    T AS ( SELECT   pctChg AS zhangdie ,
                         ( shou - kai ) AS shiti ,
                         ( shou - kai ) / kai * 100 AS shitifudu ,
                         [code] ,
@@ -38,13 +35,13 @@ WITH    T AS ( SELECT   ( CASE WHEN ( shou - kai ) > 0 THEN 1
  ,      T2
           AS ( 
 		    --取上/下影线
-		  SELECT   ( CASE zhangdie
-                            WHEN 1 THEN ( gao - shou )
-                            WHEN -1 THEN ( kai - gao )
+		  SELECT   ( CASE  
+                            WHEN zhangdie >0  THEN ( gao - shou )
+                            WHEN zhangdie <=0 THEN ( kai - gao )
                           END ) AS shanyingxian ,
-                        ( CASE zhangdie
-                            WHEN 1 THEN ( kai - di )
-                            WHEN -1 THEN ( di - shou )
+                        ( CASE  
+                            WHEN zhangdie >0  THEN ( kai - di )
+                            WHEN zhangdie <=0 THEN ( di - shou )
                           END ) AS xiayingxian ,
                         *
                FROM     T
@@ -110,11 +107,11 @@ WITH    T AS ( SELECT   ( CASE WHEN ( shou - kai ) > 0 THEN 1
 		   --查找后续中所有阴线并重新按日期正序标号 用以查找连续日期号的阴线
 		   SELECT   riqihao
                         - ROW_NUMBER() OVER ( PARTITION BY code ORDER BY riqi ) AS lianxuxiadieriqizu , COUNT(1) OVER(PARTITION BY code) AS  yingxianshu,
-						(SELECT COUNT(1) FROM T6 AS A WHERE A.zhangdie=1 AND A.code=T6.code ) AS yangxianshu,
+						(SELECT COUNT(1) FROM T6 AS A WHERE A.zhangdie>0 AND A.code=T6.code ) AS yangxianshu,
                          *
                FROM     T6
                WHERE   --- code='sh.603985' AND   
-                        zhangdie = -1
+                        zhangdie <=0 
              )
 			 
 			 ,
@@ -128,8 +125,7 @@ WITH    T AS ( SELECT   ( CASE WHEN ( shou - kai ) > 0 THEN 1
         T9
           AS ( 
 		   --标识后续中阴线最大连续天数 
-		  SELECT   MAX(lianxuxiadieshu) OVER ( PARTITION BY code ) zuidalianxuxiadieshu ,
-                        *
+		  SELECT   MAX(lianxuxiadieshu) OVER ( PARTITION BY code ) zuidalianxuxiadieshu , *
                FROM     T8
              )
 			 
@@ -156,8 +152,8 @@ WITH    T AS ( SELECT   ( CASE WHEN ( shou - kai ) > 0 THEN 1
 	     -- INTO T904
 		  FROM T10 AS A INNER JOIN T6 AS B ON  A.code = B.code
 		WHERE   A.riqihao+1=B.riqihao  	 	
-		 AND A.zhangdie=-1   AND A.shou<=A.di*1.02 AND A.kai*1.02>=A.gao
-		 AND B.zhangdie=1 
+		 AND A.zhangdie<=0   AND A.shou<=A.di*1.02 AND A.kai*1.02>=A.gao
+		 AND B.zhangdie=0 
 		AND B.kai=B.di	
 		AND (ABS(A.zuidadiefu)/1.30)<=(ABS(A.shitifudu))
 		AND B.kai>=A.shou  AND B.kai<=A.shou*1.02

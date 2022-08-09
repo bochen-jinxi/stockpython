@@ -14,7 +14,7 @@ with fileinput.input(files=('D:\code.EBK')) as f:
         # 详细指标参数，参见“历史行情指标参数”章节
         rs = bs.query_history_k_data(line,
                                      "date,code,open,high,low,close,volume,amount,adjustflag,pctChg",
-                                     start_date='2022-04-25', end_date='',
+                                     start_date='2022-08-08', end_date='',
                                      frequency="d", adjustflag="2")
         #print(rs.error_code)
         #print(rs.error_msg!='')
