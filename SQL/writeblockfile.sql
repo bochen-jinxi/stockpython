@@ -3,7 +3,7 @@
  --WHERE zhuriqi='2022-04-13'
  --ORDER BY code desc
 
-
+ 
  
 SELECT  DISTINCT   CONCAT('exec master.dbo.xp_cmdshell ''echo '+CONVERT(varchar(5), zhuriqi, 10)+'-'+CONVERT(varchar(5), riqi, 10)+'                                       '+CONVERT(varchar(5), zhuriqi, 10)+'-'+CONVERT(varchar(5), riqi, 10)+'                                                         >>C:\zd_zsone\T0002\blocknew\blocknew.cfg"''',';')
   ,  zhuriqi,
