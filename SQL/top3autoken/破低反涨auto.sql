@@ -2,13 +2,13 @@
 --买点描述：股价在近期支撑位出现大阴线破位走势，第二天大阳能强势收复。 肉眼可见前期有一波淋漓的上涨
  -----------------------------------------------------------------------------------
     
-USE stock 
-go 
+--USE stock 
+--go 
 
 --SELECT    ROW_NUMBER() OVER( PARTITION BY code ORDER BY riqi ASC) AS riqihao,*
 --INTO T90
 --FROM     dbo.lishijiager
---WHERE  riqi >='2022-07-01' and riqi <='2022-08-08'
+--WHERE  riqi >='2022-12-01' and riqi <='2023-01-13'
 
 DECLARE @i INT;
 SET @i = (SELECT COUNT(1) FROM  dbo.T90 WHERE code = 'sz.000001')
@@ -58,26 +58,14 @@ WHILE (@i > 5)
 					SELECT   *
                     FROM     T11
                     WHERE RowID2 = 1)
-					 
-
-           
-----第二天阳线收复
---INSERT INTO [dbo].[T900]
---( [gaoriqi] ,
---[code] ,
---[ciriqi] ,
---[zhuriqi] ,
---[shitifudu] ,
---[yingxianshu] ,
---[yangxianshu] ,
---[riqihao] ,
---[di] ,
---[riqi]
---)
---                SELECT DISTINCT T13.*,T12.riqi
-				INTO [dbo].[T900]
-				FROM T13 INNER JOIN T12 ON T12.code = T13.code
-                WHERE T12.di > T13.di AND (T12.riqihao+13 = T13.ciriqihao OR T12.riqihao+5 = T13.ciriqihao OR T12.riqihao+8 = T13.ciriqihao)
+	
+			INSERT INTO dbo.T900
+			(gaoriqi,code,ciriqi,zhuriqi,shitifudu,
+			ciriqihao,zhangdie,di,riqi)
+            SELECT DISTINCT T13.*,T12.riqi
+			--INTO [dbo].[T900]
+			FROM T13 INNER JOIN T12 ON T12.code = T13.code
+            WHERE T12.di > T13.di AND (T12.riqihao+13 = T13.ciriqihao OR T12.riqihao+5 = T13.ciriqihao OR T12.riqihao+8 = T13.ciriqihao)
 		 
        SET @i = @i - 1;	
 	END
