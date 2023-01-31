@@ -8,7 +8,7 @@ go
 --SELECT    ROW_NUMBER() OVER( PARTITION BY code ORDER BY riqi ASC) AS riqihao,*
 --INTO T90
 --FROM     dbo.lishijiager
---WHERE  riqi >='2022-12-01' and riqi <='2023-01-20'
+--WHERE  riqi >='2022-12-21' and riqi <='2023-01-20'
 
 DECLARE @i INT;
 SET @i = (SELECT COUNT(1) FROM  dbo.T90 WHERE code = 'sz.000001')
@@ -45,7 +45,7 @@ WHILE (@i > 5)
 				--SELECT * FROM T10 WHERE code LIKE '%300127%'
 			,T13 AS ( 
 				SELECT T10.kaishiriqi AS gaoriqi,T10.code,T10.riqi AS ciriqi,T6.riqi AS zhuriqi,T10.shitifudu,
-				T6.di AS zhudi,	T10.riqihao as ciriqihao,T10.zhangdie,T10.di
+				T6.di AS zhudi,	T10.riqihao as ciriqihao,T10.zhangdie,T10.di,T10.kai,T10.shou,T10.gao
                 FROM T10 INNER JOIN T6 ON T10.code = T6.code
                 WHERE    T10.zuihouriqihao + 1 = t6.riqihao AND T10.zhangdie < 0 
 				AND ABS(T10.shitifudu)/(100/38.2) < T6.shitifudu
@@ -70,12 +70,12 @@ WHILE (@i > 5)
                     FROM     T11
                     WHERE RowID2 = 1)
 	--SELECT * FROM T12 WHERE  T12.code LIKE '%300127%'
-			INSERT INTO dbo.T900(gaoriqi,code,ciriqi,zhuriqi,shitifudu,zhudi,ciriqihao,zhangdie,di,riqi)
+			INSERT INTO dbo.T900(gaoriqi,code,ciriqi,zhuriqi,shitifudu,zhudi,ciriqihao,zhangdie,di,kai,shou,gao,riqi)
             SELECT DISTINCT T13.*,T12.riqi
 			--INTO [dbo].[T900]
 			FROM T13 INNER JOIN T12 ON T12.code = T13.code
             WHERE (T12.di > T13.di OR  T12.di > T13.zhudi)  
-		  AND (T12.riqihao+13 = T13.ciriqihao OR T12.riqihao+11 = T13.ciriqihao  OR T12.riqihao+9 = T13.ciriqihao OR T12.riqihao+7 = T13.ciriqihao OR T12.riqihao+6 = T13.ciriqihao OR T12.riqihao+5 = T13.ciriqihao OR T12.riqihao+4 = T13.ciriqihao OR T12.riqihao+2 = T13.ciriqihao OR T12.riqihao+3 = T13.ciriqihao OR T12.riqihao+8 = T13.ciriqihao)
+		  AND (T12.riqihao+13 = T13.ciriqihao OR T12.riqihao+12 = T13.ciriqihao OR T12.riqihao+11 = T13.ciriqihao OR T12.riqihao+10 = T13.ciriqihao OR T12.riqihao+9 = T13.ciriqihao OR T12.riqihao+8 = T13.ciriqihao OR T12.riqihao+7 = T13.ciriqihao OR T12.riqihao+6 = T13.ciriqihao OR T12.riqihao+5 = T13.ciriqihao OR T12.riqihao+4 = T13.ciriqihao OR T12.riqihao+3 = T13.ciriqihao OR T12.riqihao+2 = T13.ciriqihao )
 			--AND T13.code LIKE '%300127%'	
        SET @i = @i - 1;	
 	END
