@@ -12,7 +12,7 @@ go
 --SELECT    ROW_NUMBER() OVER( PARTITION BY code ORDER BY riqi Desc) AS riqihao,*
 --INTO T90
 --FROM     dbo.lishijiager
---WHERE   riqi >='2022-06-27' and riqi <='2023-12-25'
+--WHERE   riqi >='2022-06-27' and riqi <='2024-01-04'
 
 
 
@@ -63,9 +63,9 @@ go
 		 ,T590 AS (
 		SELECT COUNT(1) OVER (PARTITION BY T5.code) AS suoyoumanzu ,* FROM T5  
 		--任何一天满足上下影线不过0.5
-		 WHERE shangyingxianfudu<=0.5 AND xiayingxianfudu<=0.5
+		 WHERE (shangyingxianfudu<=0.5 AND xiayingxianfudu<=0.5)
 		--任何一天满足光头或者任何一天满足光脚
-		-- WHERE shangyingxianfudu=0 OR  xiayingxianfudu=0
+		 OR (shangyingxianfudu=0 OR  xiayingxianfudu=0)
 		 )
 		 
 		 --SELECT * FROM T590
