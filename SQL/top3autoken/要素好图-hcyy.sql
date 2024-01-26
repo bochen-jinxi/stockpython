@@ -4,7 +4,7 @@
     
 USE stock 
 go 
-DROP TABLE T10000
+--DROP TABLE T10000
 go
 DROP TABLE T90 
 go
@@ -13,7 +13,7 @@ INTO T90
 FROM lishijiager
 --海辰药业
 --WHERE riqi>='2018-02-01' AND riqi<='2018-03-26' AND code='sz.300584' 
-WHERE riqi>='2023-12-01' AND riqi<='2024-01-22'   
+WHERE riqi>='2023-12-01' AND riqi<='2024-01-26'  
 --SELECT * FROM T90
 
 ;WITH T AS (
@@ -31,7 +31,7 @@ WHERE riqi>='2023-12-01' AND riqi<='2024-01-22'
 	-- 各代码最大实体的日期 价格
 	SELECT *
 	FROM T3
-	WHERE RowID=1 AND riqihao>=19-4)
+	WHERE RowID=1 AND riqihao>=18-3)
 	--SELECT * FROM T4		
 ,T499 AS (
 	--见最大实体后 后续价格数据中所有阴阳线 并统计后续阴阳线的数量
@@ -107,11 +107,13 @@ WHERE riqi>='2023-12-01' AND riqi<='2024-01-22'
 	AND pctChg>0
 	AND di=kai)		
 	--SELECT * FROM T600 
-			
-	SELECT DISTINCT zuidalianxushangzhangshu,zuidadiehuozezuixiaozhang,zuidashou,suoyoumanzu,zhangdiezhouqishu,kaishiriqi,jieshuriqi,ISNULL(yangxianshu,0) AS yangxianshu,ISNULL(yinxianshu,0) AS yinxianshu,ISNULL(wushangyingxianfudushu,0) AS wushangyingxianfudushu,ISNULL(wuxiayingxianfudushu,0) AS wuxiayingxianfudushu,code
-	INTO T10000
+	
+	--SELECT DISTINCT zuidalianxushangzhangshu,zuidadiehuozezuixiaozhang,zuidashou,suoyoumanzu,zhangdiezhouqishu,kaishiriqi,jieshuriqi,ISNULL(yangxianshu,0) AS yangxianshu,ISNULL(yinxianshu,0) AS yinxianshu,ISNULL(wushangyingxianfudushu,0) AS wushangyingxianfudushu,ISNULL(wuxiayingxianfudushu,0) AS wuxiayingxianfudushu,code
+	INSERT INTO T10000([kaishiriqi],[jieshuriqi]   ,[code])
+	SELECT DISTINCT  kaishiriqi,jieshuriqi,code		
+	--INTO T10000
 	FROM T600  
 	WHERE yangxianshu>yinxianshu
-	ORDER BY zuidashou desc
+	--ORDER BY zuidashou desc
 	
 	 
