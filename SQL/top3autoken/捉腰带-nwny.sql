@@ -1,19 +1,21 @@
---4è¦ç´ å¥½å›¾
---ä¹°ç‚¹æè¿°ï¼š å¥½å›¾
+--4×½Ñü´ø
+--ÂòµãÃèÊö£º ×½Ñü´ø
  -----------------------------------------------------------------------------------
     
 USE stock 
 go 
---DROP TABLE T10000
+DROP TABLE T10001
 go
 DROP TABLE T90 
 go
 SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi Desc) AS riqihao,*
 INTO T90
 FROM lishijiager
---æ–°å¤©ç»¿èƒ½
---WHERE   riqi >='2021-02-01' and riqi <='2021-03-11' AND code='sh.600956'
-WHERE riqi>='2023-12-01' AND riqi<='2024-01-26'  
+--ÄÏÍøÄÜÔ´
+WHERE riqi>='2021-02-26' AND riqi<='2021-03-10' AND code='sz.003035' 
+--Ó¦ÖÚ»¥Áª
+--WHERE riqi>='2020-04-01' AND riqi<='2020-04-15' AND code='sz.002464' 
+--WHERE riqi>='2023-12-01' AND riqi<='2024-01-26'  
 --SELECT * FROM T90
 
 ;WITH T AS (
@@ -21,20 +23,20 @@ WHERE riqi>='2023-12-01' AND riqi<='2024-01-26'
 	[kai],[shou],[di],[gao],[chengjiaoliang],[pctChg],
 	IIF(shou>=kai,shou,kai)as maxval,IIF(shou<=kai,shou,kai) AS minval				
 	FROM T90
-	WHERE riqihao<=17)
+	WHERE riqihao<=9)
 	--SELECT * FROM T		
 ,T3 AS ( 	 
 	SELECT ROW_NUMBER() OVER (PARTITION BY code ORDER BY shitifudu DESC) AS RowID,*,(gao/maxVal-1)*100 AS shangyingxianfudu,(minval/di-1) *100 AS xiayingxianfudu
 	FROM T)
 	--SELECT * FROM T3		
 ,T4 AS ( 
-	-- å„ä»£ç æœ€å¤§å®žä½“çš„æ—¥æœŸ ä»·æ ¼
+	-- ¸÷´úÂë×î´óÊµÌåµÄÈÕÆÚ ¼Û¸ñ
 	SELECT *
 	FROM T3
-	WHERE RowID=1 AND riqihao>=16-3)
+	WHERE RowID=1 AND riqihao>=8-3)
 	--SELECT * FROM T4		
 ,T499 AS (
-	--è§æœ€å¤§å®žä½“åŽ åŽç»­ä»·æ ¼æ•°æ®ä¸­æ‰€æœ‰é˜´é˜³çº¿ å¹¶ç»Ÿè®¡åŽç»­é˜´é˜³çº¿çš„æ•°é‡
+	--¼û×î´óÊµÌåºó ºóÐø¼Û¸ñÊý¾ÝÖÐËùÓÐÒõÑôÏß ²¢Í³¼ÆºóÐøÒõÑôÏßµÄÊýÁ¿
 	SELECT COUNT(1) OVER (PARTITION BY T3.code) AS zhangdiezhouqishu,T3.[pctChg],T4.di AS kaishidi,T4.gao AS kaishigao,
 	T4.code,T4.riqi AS kaishiriqi,T3.riqi,MAX(T3.riqi) OVER (PARTITION BY T3.code) AS jieshuriqi,
 	T3.riqihao,T3.shitifudu,T4.riqihao AS zuigaojiariqihao,T3.riqihao AS zuihouriqihao,
@@ -54,42 +56,44 @@ WHERE riqi>='2023-12-01' AND riqi<='2024-01-26'
 	WHERE T4.RowID=1)
 	--SELECT * FROM T499
 ,T6	AS ( 
-	-- åŽç»­æ•°æ®æŒ‰æ—¥æœŸæ­£åºæ ‡å·   
+	-- ºóÐøÊý¾Ý°´ÈÕÆÚÕýÐò±êºÅ   
 	SELECT ROW_NUMBER() OVER (PARTITION BY code ORDER BY riqi) AS riqihaoasc,*
 	FROM T499)
 	--SELECT * FROM T6
 ,T7 AS (
-	--æŸ¥æ‰¾åŽç»­ä¸­æ‰€æœ‰é˜³çº¿å¹¶é‡æ–°æŒ‰æ—¥æœŸæ­£åºæ ‡å· ç”¨ä»¥æŸ¥æ‰¾è¿žç»­æ—¥æœŸå·çš„é˜³çº¿
+	--²éÕÒºóÐøÖÐËùÓÐÑôÏß²¢ÖØÐÂ°´ÈÕÆÚÕýÐò±êºÅ ÓÃÒÔ²éÕÒÁ¬ÐøÈÕÆÚºÅµÄÑôÏß
 	SELECT riqihaoasc-ROW_NUMBER() OVER (PARTITION BY code ORDER BY riqi) AS lianxuxiadieriqizu,*
 	FROM T6
 	WHERE pctChg>0)
 	--SELECT * FROM T7
 ,T8 AS (
-	--æ ‡è¯†åŽç»­ä¸­æ‰€æœ‰è¿žç»­é˜³çº¿çš„å¤©æ•°
+	--±êÊ¶ºóÐøÖÐËùÓÐÁ¬ÐøÑôÏßµÄÌìÊý
 	SELECT COUNT(1) OVER (PARTITION BY code, lianxuxiadieriqizu) AS lianxuxiadieshu,*
 	FROM T7)
 	-- SELECT * FROM T8
 ,T9 AS ( 		  
-	--æ ‡è¯†åŽç»­ä¸­é˜³çº¿æœ€å¤§è¿žç»­å¤©æ•° 
+	--±êÊ¶ºóÐøÖÐÑôÏß×î´óÁ¬ÐøÌìÊý 
 	SELECT MAX(lianxuxiadieshu) OVER (PARTITION BY code) AS zuidalianxushangzhangshu,*
 	FROM T8)
-	-- SELECT * FROM T9
+	--SELECT * FROM T9
 ,T10 AS ( 
-	SELECT TOP 1 *
+	SELECT *
 	FROM T9 
-	WHERE zuidalianxushangzhangshu>=6)
+	WHERE zuidalianxushangzhangshu>= 2
+	)
 	--SELECT * FROM T10
 ,T5 AS (
-	SELECT T499.*,(SELECT zuidalianxushangzhangshu FROM T10 WHERE T10.code=T499.code) AS zuidalianxushangzhangshu
-	FROM  T499 
-	WHERE T499.kaishigao*1.15>T499.zuidagao AND T499.kaishidi/1.04<T499.zuixiaodi
-	AND  T499.zuidashangyingxianfudu<7 AND T499.zuidaxiayingxianfudu<4)	
+	SELECT *
+	FROM  T10  
+	WHERE kaishigao*1.25>zuidagao AND kaishidi/1.04<zuixiaodi
+	AND  zuidashangyingxianfudu<8 AND zuidaxiayingxianfudu<6)	
 	--SELECT * FROM T5	 		
 ,T590 AS (
-	SELECT COUNT(1) OVER (PARTITION BY T5.code) AS suoyoumanzu ,* FROM T5  
-	--ä»»ä½•ä¸€å¤©æ»¡è¶³ä¸Šä¸‹å½±çº¿ä¸è¿‡0.5
-	WHERE (shangyingxianfudu<=0.5 AND xiayingxianfudu<=0.6)
-	--ä»»ä½•ä¸€å¤©æ»¡è¶³å…‰å¤´æˆ–è€…ä»»ä½•ä¸€å¤©æ»¡è¶³å…‰è„š
+	SELECT COUNT(1) OVER (PARTITION BY T5.code) AS suoyoumanzu ,* 
+	FROM T5  
+	--ÈÎºÎÒ»ÌìÂú×ãÉÏÏÂÓ°Ïß²»¹ý0.5
+	WHERE (shangyingxianfudu<=4 AND xiayingxianfudu<=1)
+	--ÈÎºÎÒ»ÌìÂú×ã¹âÍ·»òÕßÈÎºÎÒ»ÌìÂú×ã¹â½Å
 	OR (shangyingxianfudu=0 OR  xiayingxianfudu=0))	 
 	--SELECT * FROM T590 
 ,T501 AS (
@@ -102,18 +106,20 @@ WHERE riqi>='2023-12-01' AND riqi<='2024-01-26'
 	FROM T590 LEFT JOIN T501 ON T590.code = T501.code  AND T590.kaishiriqi = T501.kaishiriqi)	 
 	--SELECT * FROM T599				
 ,T600 AS (
-	SELECT *
-	FROM T599
-	WHERE jieshuriqi=riqi  
-	AND pctChg>0)		
+	SELECT T599.*
+	FROM T599 
+	FULL JOIN T6 ON T599.code = T6.code 
+	WHERE T599.jieshuriqi=T6.riqi
+	AND T6.di=T6.kai
+	)		
 	--SELECT * FROM T600 
-			
+	
 	--SELECT DISTINCT zuidalianxushangzhangshu,zuidadiehuozezuixiaozhang,zuidashou,suoyoumanzu,zhangdiezhouqishu,kaishiriqi,jieshuriqi,ISNULL(yangxianshu,0) AS yangxianshu,ISNULL(yinxianshu,0) AS yinxianshu,ISNULL(wushangyingxianfudushu,0) AS wushangyingxianfudushu,ISNULL(wuxiayingxianfudushu,0) AS wuxiayingxianfudushu,code
-	INSERT INTO T10000([kaishiriqi],[jieshuriqi]   ,[code])
+	--INSERT INTO T10000([kaishiriqi],[jieshuriqi]   ,[code])
 	SELECT DISTINCT  kaishiriqi,jieshuriqi,code		
-	--INTO T10000
+	INTO T10001
 	FROM T600  
-	WHERE yangxianshu>yinxianshu
+	--WHERE yangxianshu>=yinxianshu
 	--ORDER BY zuidashou desc
 	
 	 

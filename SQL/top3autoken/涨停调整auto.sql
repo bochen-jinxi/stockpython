@@ -1,5 +1,5 @@
---SCSä¹°ç‚¹4ï¼šæ¶¨åœè°ƒæ•´
---ä¹°ç‚¹æè¿°ï¼šè‚¡ä»·åœ¨è¿‘æœŸæ”¯æ’‘ä½å‡ºç°å¤§é˜´çº¿ç ´ä½èµ°åŠ¿ï¼Œç¬¬äºŒå¤©å¤§é˜³èƒ½å¼ºåŠ¿æ”¶å¤ã€‚ è‚‰çœ¼å¯è§å‰æœŸæœ‰ä¸€æ³¢æ·‹æ¼“çš„ä¸Šæ¶¨
+--SCSÂòµã4£ºÆÆµÍ·´ÕÇ
+--ÂòµãÃèÊö£º¹É¼ÛÔÚ½üÆÚÖ§³ÅÎ»³öÏÖ´óÒõÏßÆÆÎ»×ßÊÆ£¬µÚ¶şÌì´óÑôÄÜÇ¿ÊÆÊÕ¸´¡£ ÈâÑÛ¿É¼ûÇ°ÆÚÓĞÒ»²¨ÁÜÀìµÄÉÏÕÇ
  -----------------------------------------------------------------------------------
     
 USE stock 
@@ -8,17 +8,16 @@ go
 --SELECT    ROW_NUMBER() OVER( PARTITION BY code ORDER BY riqi ASC) AS riqihao,*
 --INTO T90
 --FROM     dbo.lishijiager
---WHERE  riqi >='2023-05-19' and riqi <='2023-06-26'
+--WHERE  riqi >='2022-12-21' and riqi <='2023-01-30'
 
 DECLARE @i INT;
 SET @i = (SELECT COUNT(1) FROM  dbo.T90 WHERE code = 'sz.000001')
 WHILE (@i > 5) 
 	BEGIN
-	SELECT @i  
 		;WITH T AS (
 				SELECT riqihao,pctChg AS zhangdie,(shou - kai)/kai*100 AS shitifudu,[code],[riqi],[kai],[shou],[di],[gao],[chengjiaoliang],[pctChg] 
-				FROM     dbo.T90   
-				WHERE    riqihao <= @i  )
+				FROM     dbo.T90
+				WHERE    riqihao <= @i)
 			,T2 AS (
 				SELECT *
 				FROM T 
@@ -26,7 +25,7 @@ WHILE (@i > 5)
 			)
 			--SELECT * FROM T2
 			,T5 AS (
-		  		--è§æ¶¨åœä»· åç»­ä»·æ ¼æ•°æ®ä¸­æ‰€æœ‰é˜´é˜³çº¿ å¹¶ç»Ÿè®¡åç»­é˜´é˜³çº¿çš„æ•°é‡
+		  		--¼ûÕÇÍ£¼Û ºóĞø¼Û¸ñÊı¾İÖĞËùÓĞÒõÑôÏß ²¢Í³¼ÆºóĞøÒõÑôÏßµÄÊıÁ¿
                 SELECT COUNT(1) OVER (PARTITION BY T.code) AS zhangdiezhouqishu,T2.code,T2.riqi AS kaishiriqi,T.riqi,
                        T.riqihao,T.shitifudu,T.zhangdie,T2.riqihao AS zhangtingjiariqihao,T.riqihao AS zuihouriqihao,
                        T.di,T.kai,T.shou,T.gao,MIN(T.shitifudu) OVER (PARTITION BY T.code) AS zuidadiefu
@@ -34,22 +33,21 @@ WHILE (@i > 5)
                 )
 				--SELECT * FROM T5 
 			,T10 AS (
-				--æŸ¥æ‰¾åç»­é˜´çº¿ å¹¶ä¸”æ˜¯æ¬¡æœ€åä¸€ä¸ªäº¤æ˜“æ—¥æœŸ
+				--²éÕÒºóĞøÒõÏß ²¢ÇÒÊÇ´Î×îºóÒ»¸ö½»Ò×ÈÕÆÚ
                 SELECT   *
                 FROM     T5
-                WHERE  zhangdie<0 AND T5.zuihouriqihao= (T5.zhangtingjiariqihao+zhangdiezhouqishu))
+                WHERE  zhangdie<0 AND T5.zuihouriqihao+1= (T5.zhangtingjiariqihao+zhangdiezhouqishu))
 				--SELECT * FROM T10 
 			,T13 AS ( 
 				SELECT T10.kaishiriqi AS zhangtingriqi,T10.code,T10.riqi AS ciriqi,T.riqi AS zhuriqi,T10.shitifudu,
 				T.di AS zhudi,T10.riqihao as ciriqihao,T10.zhangdie,T10.di,T10.kai,T10.shou,T10.gao,T10.zhangtingjiariqihao
                 FROM T10 INNER JOIN T ON T10.code = T.code
-                WHERE    T10.zuihouriqihao  = t.riqihao
-				 AND T10.zhangdie < 0 
+                WHERE    T10.zuihouriqihao + 1 = t.riqihao AND T10.zhangdie < 0 
 				AND ABS(T10.shitifudu)/(100/38.2) < T.shitifudu
                        AND T10.di * 1.03 >= T10.shou 
 					   AND (T.di * 1.01 >= T.kai  OR (T.di * 1.03 >= T.kai AND T.shou>T10.gao/2 ) OR T10.di=T10.shou OR T.kai=T.di OR  T.shou>T10.gao )
 					   )	
-					--	SELECT * FROM T13 	
+						--SELECT * FROM T13 	
 			,T15 AS ( 
 				SELECT T13.ciriqihao,T13.code,T13.ciriqi,T13.zhangtingriqi,T13.zhangtingjiariqihao,T13.di AS cidi,T13.kai AS  cikai,T13.shou AS cishou,T13.gao AS cigao
 			    FROM T13)		 
