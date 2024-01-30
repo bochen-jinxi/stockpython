@@ -1,4 +1,4 @@
-  --Êü•ËØ¢ÊéíÂ∫è
+  --≤È—Ø≈≈–Ú
  --SELECT * FROM  dbo.T900
  --WHERE ciriqi='2022-04-13'
  --ORDER BY code desc
@@ -22,4 +22,4 @@ SELECT  DISTINCT   CONCAT('exec master.dbo.xp_cmdshell ''echo '+CONVERT(varchar(
    CONVERT(varchar(5), kaishiriqi, 10)
   FROM [stock].[dbo].[T10001] 
   ORDER BY kaishiriqi desc 
--- OFFSET (1-1)*100 ROWS FETCH NEXT 100 ROWS ONLY;
+ OFFSET (1-1)*100 ROWS FETCH NEXT 100 ROWS ONLY;

@@ -4,7 +4,7 @@
     
 USE stock 
 go 
-DROP TABLE T10001
+--DROP TABLE T10001
 go
 DROP TABLE T90 
 go
@@ -112,9 +112,9 @@ WHERE riqi>='2019-08-14' AND riqi<='2019-08-26' AND code='sz.300433'
 	--SELECT * FROM T600 
 	
 	--SELECT DISTINCT zuidalianxushangzhangshu,zuidadiehuozezuixiaozhang,zuidashou,suoyoumanzu,zhangdiezhouqishu,kaishiriqi,jieshuriqi,ISNULL(yangxianshu,0) AS yangxianshu,ISNULL(yinxianshu,0) AS yinxianshu,ISNULL(wushangyingxianfudushu,0) AS wushangyingxianfudushu,ISNULL(wuxiayingxianfudushu,0) AS wuxiayingxianfudushu,code
-	--INSERT INTO T10000([kaishiriqi],[jieshuriqi]   ,[code])
+	INSERT INTO T10000([kaishiriqi],[jieshuriqi]   ,[code])
 	SELECT DISTINCT  kaishiriqi,jieshuriqi,code		
-	INTO T10001
+	--INTO T10001
 	FROM T600  
 	--WHERE yangxianshu>=yinxianshu
 	--ORDER BY zuidashou desc
