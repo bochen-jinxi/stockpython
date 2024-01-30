@@ -13,7 +13,7 @@ INTO T90
 FROM lishijiager
 --新天绿能
 --WHERE   riqi >='2021-02-01' and riqi <='2021-03-11' AND code='sh.600956'
-WHERE riqi>='2023-12-01' AND riqi<='2024-01-26'  
+WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'  
 --SELECT * FROM T90
 
 ;WITH T AS (

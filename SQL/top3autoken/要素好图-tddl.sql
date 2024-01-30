@@ -13,7 +13,7 @@ INTO T90
 FROM lishijiager
 --通达动力
 --WHERE riqi >='2021-02-16' and riqi <='2021-03-19' AND code='sz.002576' 
-WHERE riqi>='2023-12-01' AND riqi<='2024-01-26'
+WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'
 --SELECT * FROM T90
 
 ;WITH T AS (

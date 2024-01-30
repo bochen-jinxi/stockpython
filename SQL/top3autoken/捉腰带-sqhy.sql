@@ -12,8 +12,8 @@ SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi Desc) AS riqihao,*
 INTO T90
 FROM lishijiager
 --ÈýÆß»¥Óé
-WHERE riqi>='2019-11-18' AND riqi<='2019-12-03' AND code='sz.002555' 
---WHERE riqi>='2023-12-01' AND riqi<='2024-01-26'  
+--WHERE riqi>='2019-11-18' AND riqi<='2019-12-03' AND code='sz.002555' 
+WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'  
 --SELECT * FROM T90
 
 ;WITH T AS (
@@ -112,7 +112,7 @@ WHERE riqi>='2019-11-18' AND riqi<='2019-12-03' AND code='sz.002555'
 	--SELECT * FROM T600 
 	
 	--SELECT DISTINCT zuidalianxushangzhangshu,zuidadiehuozezuixiaozhang,zuidashou,suoyoumanzu,zhangdiezhouqishu,kaishiriqi,jieshuriqi,ISNULL(yangxianshu,0) AS yangxianshu,ISNULL(yinxianshu,0) AS yinxianshu,ISNULL(wushangyingxianfudushu,0) AS wushangyingxianfudushu,ISNULL(wuxiayingxianfudushu,0) AS wuxiayingxianfudushu,code
-	INSERT INTO T10000([kaishiriqi],[jieshuriqi]   ,[code])
+	INSERT INTO T10001([kaishiriqi],[jieshuriqi]   ,[code])
 	SELECT DISTINCT  kaishiriqi,jieshuriqi,code		
 	--INTO T10001
 	FROM T600  

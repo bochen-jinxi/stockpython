@@ -12,10 +12,10 @@ SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi Desc) AS riqihao,*
 INTO T90
 FROM lishijiager
 --南网能源
-WHERE riqi>='2021-02-26' AND riqi<='2021-03-10' AND code='sz.003035' 
+--WHERE riqi>='2021-02-26' AND riqi<='2021-03-10' AND code='sz.003035' 
 --应众互联
 --WHERE riqi>='2020-04-01' AND riqi<='2020-04-15' AND code='sz.002464' 
---WHERE riqi>='2023-12-01' AND riqi<='2024-01-26'  
+WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'  
 --SELECT * FROM T90
 
 ;WITH T AS (
@@ -115,7 +115,7 @@ WHERE riqi>='2021-02-26' AND riqi<='2021-03-10' AND code='sz.003035'
 	--SELECT * FROM T600 
 	
 	--SELECT DISTINCT zuidalianxushangzhangshu,zuidadiehuozezuixiaozhang,zuidashou,suoyoumanzu,zhangdiezhouqishu,kaishiriqi,jieshuriqi,ISNULL(yangxianshu,0) AS yangxianshu,ISNULL(yinxianshu,0) AS yinxianshu,ISNULL(wushangyingxianfudushu,0) AS wushangyingxianfudushu,ISNULL(wuxiayingxianfudushu,0) AS wuxiayingxianfudushu,code
-	INSERT INTO T10000([kaishiriqi],[jieshuriqi]   ,[code])
+	INSERT INTO T10001([kaishiriqi],[jieshuriqi]   ,[code])
 	SELECT DISTINCT  kaishiriqi,jieshuriqi,code		
 	--INTO T10001
 	FROM T600  
