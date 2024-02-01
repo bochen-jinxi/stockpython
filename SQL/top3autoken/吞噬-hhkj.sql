@@ -113,9 +113,9 @@ WHERE riqi>='2021-01-01' AND riqi<='2021-02-09' AND code='sz.002645'
 ,T600 AS (
 	SELECT T599.*
 	FROM T599 
-	FULL JOIN T6 ON T599.code = T6.code 
-	WHERE T599.jieshuriqi=T6.riqi
-	AND T6.di>T6.kai/1.009
+	INNER JOIN T4 ON T599.code = T4.code 
+	WHERE T599.kaishiriqi=T4.riqi
+	AND T4.di>T4.kai/1.009
 	)		
 	--SELECT * FROM T600 
 	

@@ -12,9 +12,9 @@ SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi Desc) AS riqihao,*
 INTO T90
 FROM lishijiager
 --长源电力
---WHERE riqi>='2021-02-14' AND riqi<='2021-03-10' AND code='sz.000966' 
+WHERE riqi>='2021-02-14' AND riqi<='2021-03-10' AND code='sz.000966' 
 --东方日升
-WHERE riqi>='2020-11-14' AND riqi<='2020-12-10' AND code='sz.300118' 
+--WHERE riqi>='2020-11-14' AND riqi<='2020-12-10' AND code='sz.300118' 
  
 --WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'  
 --SELECT * FROM T90
@@ -109,13 +109,13 @@ WHERE riqi>='2020-11-14' AND riqi<='2020-12-10' AND code='sz.300118'
 	FROM T590 LEFT JOIN T4 AS A ON T590.code = A.code  AND T590.kaishiriqi = A.riqi
 	LEFT JOIN T499 AS B ON T590.code = B.code  AND T590.zhuyiriqi = B.riqi
 	WHERE (A.kai<B.shou AND A.shou>B.kai AND B.pctChg<0 ) OR (A.kai<B.kai AND A.shou>B.shou AND B.pctChg>0 )  )	 
-	--SELECT * FROM T599				
+     --SELECT * FROM T599				
 ,T600 AS (
 	SELECT T599.*
 	FROM T599 
-	FULL JOIN T6 ON T599.code = T6.code 
-	WHERE T599.jieshuriqi=T6.riqi
-	AND T6.di>T6.kai/1.009
+	INNER JOIN T4 ON T599.code = T4.code 
+	WHERE T599.kaishiriqi=T4.riqi
+	AND T4.di>T4.kai/1.019
 	)		
 	--SELECT * FROM T600 
 	
