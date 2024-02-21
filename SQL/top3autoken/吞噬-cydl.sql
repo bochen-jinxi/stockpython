@@ -1,7 +1,7 @@
---4吞噬
+--4吞噬 长源电力有变节奏的跳空缺口是一个强烈进攻信号
 --买点描述：吞噬
  -----------------------------------------------------------------------------------
-    
+     
 USE stock 
 go 
 --DROP TABLE T10002
@@ -12,11 +12,11 @@ SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi Desc) AS riqihao,*
 INTO T90
 FROM lishijiager
 --长源电力
-WHERE riqi>='2021-02-14' AND riqi<='2021-03-10' AND code='sz.000966' 
+---WHERE riqi>='2021-02-14' AND riqi<='2021-03-10' AND code='sz.000966' 
 --东方日升
 --WHERE riqi>='2020-11-14' AND riqi<='2020-12-10' AND code='sz.300118' 
  
---WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'  
+WHERE riqi>='2023-12-01' AND riqi<='2024-02-21' 
 --SELECT * FROM T90
 
 ;WITH T AS (
@@ -24,14 +24,29 @@ WHERE riqi>='2021-02-14' AND riqi<='2021-03-10' AND code='sz.000966'
 	[kai],[shou],[di],[gao],[chengjiaoliang],[pctChg],
 	IIF(shou>=kai,shou,kai)as maxval,IIF(shou<=kai,shou,kai) AS minval				
 	FROM T90
-	WHERE riqihao<=9)
-	--SELECT * FROM T		
+	WHERE riqihao<=10)
+	
 ,T3 AS ( 	 
 	SELECT ROW_NUMBER() OVER (PARTITION BY code ORDER BY shitifudu DESC) AS RowID,*,(gao/maxVal-1)*100 AS shangyingxianfudu,(minval/di-1) *100 AS xiayingxianfudu
 	FROM T)
 	--SELECT * FROM T3		
+
+,T401 AS ( 
+SELECT T.*,T.kai-A.maxval AS val FROM T	INNER JOIN  T AS A ON T.code = A.code WHERE T.riqihao+1=a.riqihao
+	
+	)
+	--SELECT * FROM T401
+	,T402 AS ( 
+SELECT ROW_NUMBER() OVER (PARTITION BY code ORDER BY riqihao DESC) AS RowID, * FROM T401 WHERE val>0
+	
+	)
+	,T403 AS ( 
+SELECT  * FROM T402 WHERE RowID=1  AND riqihao>=10-2
+	
+	)
+	--SELECT * FROM T403
 ,T4 AS ( 
-	-- 各代码最大实体的日期 价格
+  
 	SELECT *
 	FROM T3
 	WHERE riqihao=1 )
@@ -121,9 +136,9 @@ WHERE riqi>='2021-02-14' AND riqi<='2021-03-10' AND code='sz.000966'
 	
 	--SELECT DISTINCT zuidalianxushangzhangshu,zuidadiehuozezuixiaozhang,zuidashou,suoyoumanzu,zhangdiezhouqishu,kaishiriqi,jieshuriqi,ISNULL(yangxianshu,0) AS yangxianshu,ISNULL(yinxianshu,0) AS yinxianshu,ISNULL(wushangyingxianfudushu,0) AS wushangyingxianfudushu,ISNULL(wuxiayingxianfudushu,0) AS wuxiayingxianfudushu,code
 	INSERT INTO T10002([kaishiriqi],[jieshuriqi]   ,[code])
-	SELECT DISTINCT  kaishiriqi,jieshuriqi,code		
+	SELECT DISTINCT  T403.riqi,jieshuriqi,T600.code		
 	--INTO T10002
-	FROM T600  
+	FROM T600  INNER JOIN  T403 ON T600.code = T403.code
 	--WHERE yangxianshu>=yinxianshu
 	--ORDER BY zuidashou desc
 	
