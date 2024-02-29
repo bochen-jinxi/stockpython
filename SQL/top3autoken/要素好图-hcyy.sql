@@ -92,8 +92,9 @@ WHERE riqi>='2018-02-28' AND riqi<='2018-03-26' AND code='sz.300584'
 	OR (shangyingxianfudu=0 OR  xiayingxianfudu=0))	 
 	--SELECT * FROM T590 
 ,T501 AS (
-	SELECT TOP 1 code,kaishiriqi,jieshuriqi,yangxianshu,yinxianshu	
-	FROM T590)
+	SELECT DISTINCT code,kaishiriqi,jieshuriqi,yangxianshu,yinxianshu	
+	FROM T590 
+	WHERE yangxianshu>yinxianshu)
 	--SELECT * FROM T501	
  ,T502 AS (
 	SELECT T3.*,kaishiriqi 	

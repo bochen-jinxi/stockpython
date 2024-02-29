@@ -12,8 +12,8 @@ SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi Desc) AS riqihao,*
 INTO T90
 FROM lishijiager
 --万通智控
---WHERE riqi >='2019-10-01' and riqi <='2019-11-29'  AND code='sz.300643' 
-WHERE riqi>='2023-12-01' AND riqi<='2024-01-30' 
+WHERE riqi >='2019-11-11' and riqi <='2019-11-29'  AND code='sz.300643' 
+--WHERE riqi>='2023-12-01' AND riqi<='2024-01-30' 
 --SELECT * FROM T90
 
 ;WITH T AS (
@@ -81,7 +81,7 @@ WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'
 ,T5 AS (
 	SELECT *
 	FROM  T10  
-	WHERE kaishigao*1.15>zuidagao AND kaishidi/1.04<zuixiaodi
+	WHERE kaishigao*1.15>zuidagao AND kaishidi<zuixiaodi
 	AND  zuidashangyingxianfudu<7 AND zuidaxiayingxianfudu<4)	
 	--SELECT * FROM T5	 		
 ,T590 AS (
@@ -92,27 +92,30 @@ WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'
 	OR (shangyingxianfudu=0 OR  xiayingxianfudu=0))	 
 	--SELECT * FROM T590 
 ,T501 AS (
-	SELECT code,kaishiriqi	
-	FROM T5)
-	--SELECT * FROM T501		
-,T599 AS 
-(				
-	SELECT T590.* 
-	FROM T590 LEFT JOIN T501 ON T590.code = T501.code  AND T590.kaishiriqi = T501.kaishiriqi)	 
-	--SELECT * FROM T599				
-,T600 AS (
-	SELECT *
-	FROM T599
-	WHERE jieshuriqi=riqi  
-	AND pctChg>0)		
-	--SELECT * FROM T600 
+	SELECT DISTINCT code,kaishiriqi,jieshuriqi,yangxianshu,yinxianshu	
+	FROM T590
+	WHERE yangxianshu>yinxianshu)
+	--SELECT * FROM T501	
+ ,T502 AS (
+	SELECT T3.*,kaishiriqi 	
+	FROM  T3 LEFT JOIN T501 ON T3.code = T501.code  and  T3.riqi = T501.kaishiriqi 
+	WHERE  T501.kaishiriqi IS NOT NULL)
+,T503 AS (
+	SELECT T3.*,jieshuriqi 
+	FROM  T3 LEFT JOIN T501 ON T3.code = T501.code  and  T3.riqi = T501.jieshuriqi 
+	WHERE  T501.jieshuriqi IS NOT NULL)		
+,T599 AS (				
+	SELECT A.kaishiriqi,B.jieshuriqi,A.code
+	FROM T502 AS A INNER JOIN T503 AS B	ON A.code=B.code
+	WHERE B.pctChg>0 AND A.di/1.02<B.di)	
+	--SELECT * FROM T599 
 			
 	--SELECT DISTINCT zuidalianxushangzhangshu,zuidadiehuozezuixiaozhang,zuidashou,suoyoumanzu,zhangdiezhouqishu,kaishiriqi,jieshuriqi,ISNULL(yangxianshu,0) AS yangxianshu,ISNULL(yinxianshu,0) AS yinxianshu,ISNULL(wushangyingxianfudushu,0) AS wushangyingxianfudushu,ISNULL(wuxiayingxianfudushu,0) AS wuxiayingxianfudushu,code
 	INSERT INTO T10000([kaishiriqi],[jieshuriqi]   ,[code])
 	SELECT DISTINCT  kaishiriqi,jieshuriqi,code		
 	--INTO T10000
-	FROM T600  
-	WHERE yangxianshu>yinxianshu
+	FROM T599  
+
 	--ORDER BY zuidashou desc
 	
 	 
