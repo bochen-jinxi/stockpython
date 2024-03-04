@@ -12,7 +12,7 @@ SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi Desc) AS riqihao,*
 INTO T90
 FROM lishijiager
 --通达动力
---WHERE riqi >='2021-02-16' and riqi <='2021-03-19' AND code='sz.002576' 
+--WHERE riqi >='2021-02-26' and riqi <='2021-03-19' AND code='sz.002576' 
 WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'
 --SELECT * FROM T90
 
@@ -21,23 +21,26 @@ WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'
 	[kai],[shou],[di],[gao],[chengjiaoliang],[pctChg],
 	IIF(shou>=kai,shou,kai)as maxval,IIF(shou<=kai,shou,kai) AS minval				
 	FROM T90
-	WHERE riqihao<=17)
+	WHERE riqihao<=16)
 	--SELECT * FROM T	
-	,T200 AS (
-	SELECT B.*,A.shou AS Ashou FROM T AS A INNER JOIN T AS B ON A.code = B.code AND A.riqihao	=B.riqihao+1)
-	,T201 AS 
-	(
-	SELECT *,(CASE WHEN shou-Ashou>0 THEN 1 ELSE -1 END) AS gaokai,(shou/Ashou-1)*100 AS gaokaifudu FROM T200
-	)	
 ,T3 AS ( 	 
-	SELECT *,(gao/maxVal-1)*100 AS shangyingxianfudu,(minval/di-1) *100 AS xiayingxianfudu
-	FROM T201)
-	--SELECT * FROM T3		
+	SELECT ROW_NUMBER() OVER (PARTITION BY code ORDER BY shitifudu DESC) AS RowID,*,(gao/maxVal-1)*100 AS shangyingxianfudu,(minval/di-1) *100 AS xiayingxianfudu
+	FROM T)
+,T401 AS ( 
+	--找跳空
+	SELECT T.*,T.kai-A.maxval AS val
+	FROM T INNER JOIN T AS A ON T.code = A.code 
+	WHERE T.riqihao+1=A.riqihao)
+	--SELECT * FROM T401
+,T402 AS ( 
+	SELECT ROW_NUMBER() OVER (PARTITION BY code ORDER BY riqihao DESC) AS RowID,* 
+	FROM T401 
+	WHERE val>0)
 ,T4 AS ( 
-	-- 各代码最大实体的日期 价格
-	SELECT 1 AS RowID,*
-	FROM T3
-	WHERE riqihao>=16-3 AND gaokaifudu>2)
+	SELECT * 
+	FROM T402 
+	WHERE RowID=1  AND riqihao>=15-3 AND val>0.19)
+
 	--SELECT * FROM T4		
 ,T499 AS (
 	--见最大实体后 后续价格数据中所有阴阳线 并统计后续阴阳线的数量
@@ -99,27 +102,31 @@ WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'
 	OR (shangyingxianfudu=0 OR  xiayingxianfudu=0))	 
 	--SELECT * FROM T590 
 ,T501 AS (
-	SELECT code,kaishiriqi	
-	FROM T5)
-	--SELECT * FROM T501		
-,T599 AS 
-(				
-	SELECT T590.* 
-	FROM T590 LEFT JOIN T501 ON T590.code = T501.code  AND T590.kaishiriqi = T501.kaishiriqi)	 
-	--SELECT * FROM T599				
-,T600 AS (
-	SELECT *
-	FROM T599
-	WHERE jieshuriqi=riqi  
-	AND pctChg>0)		
-	--SELECT * FROM T600 
+	SELECT DISTINCT code,kaishiriqi,jieshuriqi,yangxianshu,yinxianshu	
+	FROM T590
+	WHERE yangxianshu>yinxianshu)
+	--SELECT * FROM T501	
+ ,T502 AS (
+	SELECT T3.*,kaishiriqi 	
+	FROM  T3 LEFT JOIN T501 ON T3.code = T501.code  and  T3.riqi = T501.kaishiriqi 
+	WHERE  T501.kaishiriqi IS NOT NULL)
+,T503 AS (
+	SELECT T3.*,jieshuriqi 
+	FROM  T3 LEFT JOIN T501 ON T3.code = T501.code  and  T3.riqi = T501.jieshuriqi 
+	WHERE  T501.jieshuriqi IS NOT NULL)		
+,T599 AS (				
+	SELECT A.kaishiriqi,B.jieshuriqi,A.code
+	FROM T502 AS A INNER JOIN T503 AS B	ON A.code=B.code
+	WHERE B.pctChg>0 AND A.shou<B.shou  AND B.di*1.019>A.shou)	
+	--SELECT * FROM T599 	
+ 
 			
 	--SELECT DISTINCT zuidalianxushangzhangshu,zuidadiehuozezuixiaozhang,zuidashou,suoyoumanzu,zhangdiezhouqishu,kaishiriqi,jieshuriqi,ISNULL(yangxianshu,0) AS yangxianshu,ISNULL(yinxianshu,0) AS yinxianshu,ISNULL(wushangyingxianfudushu,0) AS wushangyingxianfudushu,ISNULL(wuxiayingxianfudushu,0) AS wuxiayingxianfudushu,code
 	INSERT INTO T10000([kaishiriqi],[jieshuriqi]   ,[code])
 	SELECT DISTINCT  kaishiriqi,jieshuriqi,code		
 	--INTO T10000
-	FROM T600  
-	WHERE yangxianshu>yinxianshu
+	FROM T599  
+ 
 	--ORDER BY zuidashou desc
 	
 	 

@@ -12,8 +12,8 @@ SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi Desc) AS riqihao,*
 INTO T90
 FROM lishijiager
 --万通智控
-WHERE riqi >='2019-11-11' and riqi <='2019-11-29'  AND code='sz.300643' 
---WHERE riqi>='2023-12-01' AND riqi<='2024-01-30' 
+--WHERE riqi >='2019-11-11' and riqi <='2019-11-29'  AND code='sz.300643' 
+WHERE riqi>='2023-12-01' AND riqi<='2024-01-30' 
 --SELECT * FROM T90
 
 ;WITH T AS (
