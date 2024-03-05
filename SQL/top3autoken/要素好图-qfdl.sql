@@ -12,7 +12,7 @@ SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi Desc) AS riqihao,*
 INTO T90
 FROM lishijiager
 --起帆电缆
---WHERE   riqi >='2021-02-18' and riqi <='2021-03-11' AND code='sh.605222'
+WHERE   riqi >='2021-02-18' and riqi <='2021-03-11' AND code='sh.605222'
 --WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'   
 --SELECT * FROM T90
 
@@ -78,10 +78,12 @@ FROM lishijiager
 	SELECT TOP 1 *
 	FROM T9 
 	WHERE zuidalianxushangzhangshu>=3)
+	
 ,T5 AS (
 	SELECT *,(SELECT zuidalianxushangzhangshu FROM T10 WHERE T10.code=T499.code) AS zuidalianxushangzhangshu
 	FROM  T499  
-	WHERE kaishigao*1.15>zuidagao AND kaishidi/1.04<zuixiaodi
+	WHERE 
+	1-kaishigao/zuidagao<0.05  AND 1-zuixiaodi/kaishidi<0.09
 	AND  zuidashangyingxianfudu<7 AND zuidaxiayingxianfudu<4)	
 	--SELECT * FROM T5	 		
 ,T590 AS (

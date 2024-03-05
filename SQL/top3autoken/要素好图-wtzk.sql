@@ -12,8 +12,8 @@ SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi Desc) AS riqihao,*
 INTO T90
 FROM lishijiager
 --万通智控
---WHERE riqi >='2019-11-11' and riqi <='2019-11-29'  AND code='sz.300643' 
-WHERE riqi>='2023-12-01' AND riqi<='2024-01-30' 
+WHERE riqi >='2019-11-11' and riqi <='2019-11-29'  AND code='sz.300643' 
+--WHERE riqi>='2023-12-01' AND riqi<='2024-01-30' 
 --SELECT * FROM T90
 
 ;WITH T AS (
@@ -78,10 +78,12 @@ WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'
 	SELECT *
 	FROM T9 
 	WHERE zuidalianxushangzhangshu>=3)
+	--SELECT * FROM T499
 ,T5 AS (
 	SELECT *
 	FROM  T10  
-	WHERE kaishigao*1.15>zuidagao AND kaishidi<zuixiaodi
+	WHERE  1-kaishigao/zuidagao>0.12  AND 1-kaishidi/zuixiaodi>0.05
+	--WHERE kaishigao*1.15>zuidagao AND kaishidi<zuixiaodi
 	AND  zuidashangyingxianfudu<7 AND zuidaxiayingxianfudu<4)	
 	--SELECT * FROM T5	 		
 ,T590 AS (
@@ -107,7 +109,7 @@ WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'
 ,T599 AS (				
 	SELECT A.kaishiriqi,B.jieshuriqi,A.code
 	FROM T502 AS A INNER JOIN T503 AS B	ON A.code=B.code
-	WHERE B.pctChg>0 AND A.di/1.02<B.di)	
+	WHERE B.pctChg>0 AND 1-A.di/B.di>0.02)	
 	--SELECT * FROM T599 
 			
 	--SELECT DISTINCT zuidalianxushangzhangshu,zuidadiehuozezuixiaozhang,zuidashou,suoyoumanzu,zhangdiezhouqishu,kaishiriqi,jieshuriqi,ISNULL(yangxianshu,0) AS yangxianshu,ISNULL(yinxianshu,0) AS yinxianshu,ISNULL(wushangyingxianfudushu,0) AS wushangyingxianfudushu,ISNULL(wuxiayingxianfudushu,0) AS wuxiayingxianfudushu,code
