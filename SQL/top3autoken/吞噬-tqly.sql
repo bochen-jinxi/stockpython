@@ -1,7 +1,7 @@
 --4吞噬 天齐锂业有变节奏的跳空缺口是一个强烈进攻信号
 --买点描述：吞噬
  -----------------------------------------------------------------------------------
-     DELETE FROM T10002
+     
 USE stock 
 go 
 --DROP TABLE T10002
@@ -12,8 +12,8 @@ SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi Desc) AS riqihao,*
 INTO T90
 FROM lishijiager
 --天齐锂业
----WHERE riqi>='2020-10-01' AND riqi<='2020-11-20' AND code='sz.002466' 
-WHERE riqi>='2024-01-01' AND riqi<='2024-02-22' 
+WHERE riqi>='2020-11-02' AND riqi<='2020-11-20' AND code='sz.002466' 
+--WHERE riqi>='2024-01-01' AND riqi<='2024-02-21' 
 --SELECT * FROM T90
 
 ;WITH T AS (
@@ -36,6 +36,7 @@ WHERE riqi>='2024-01-01' AND riqi<='2024-02-22'
 	SELECT ROW_NUMBER() OVER (PARTITION BY code ORDER BY riqihao DESC) AS RowID,* 
 	FROM T401 
 	WHERE val>0)
+	--SELECT * FROM T402
 ,T403 AS ( 
 	SELECT * 
 	FROM T402 
@@ -49,7 +50,6 @@ WHERE riqi>='2024-01-01' AND riqi<='2024-02-22'
 	--见最大实体后 后续价格数据中所有阴阳线 并统计后续阴阳线的数量
 	SELECT COUNT(1) OVER (PARTITION BY T3.code) AS zhangdiezhouqishu,T3.[pctChg],T4.di AS kaishidi,T4.gao AS kaishigao,
 	T4.code,T4.riqi AS kaishiriqi,T3.riqi,MAX(T3.riqi) OVER (PARTITION BY T3.code) AS zhuyiriqi,
-	ROW_NUMBER() OVER (PARTITION BY T3.code ORDER BY T3.di) AS quanbuzuixiaodi,
 	T3.riqihao,T3.shitifudu,T4.riqihao AS zuigaojiariqihao,T3.riqihao AS zuihouriqihao,
 	T3.di,T3.kai,T3.shou,T3.gao,
 	COUNT(CASE WHEN T3.shangyingxianfudu = 0 THEN 1 END) OVER(PARTITION BY T3.code) AS wushangyingxianfudushu,
@@ -68,7 +68,7 @@ WHERE riqi>='2024-01-01' AND riqi<='2024-02-22'
 	--SELECT * FROM T499
 ,T6	AS ( 
 	-- 后续数据按日期正序标号   
-	SELECT ROW_NUMBER() OVER (PARTITION BY code ORDER BY riqi) AS riqihaoasc,* ,(CASE WHEN quanbuzuixiaodi=1 THEN riqi  END) AS  quanbuzuixiaodiriqi
+	SELECT ROW_NUMBER() OVER (PARTITION BY code ORDER BY riqi) AS riqihaoasc,*
 	FROM T499)
 	--SELECT * FROM T6
 ,T7 AS (
@@ -94,9 +94,9 @@ WHERE riqi>='2024-01-01' AND riqi<='2024-02-22'
 	)
 	--SELECT * FROM T10
 ,T5 AS (
-	SELECT *	
+	SELECT *	,1-kaishidi/zuixiaodi AS   dfgdfgdfgd
 	FROM  T10  
-	WHERE kaishigao/1.15<zuidagao AND kaishidi/1.15<zuixiaodi
+	WHERE zuidagao/kaishigao-1<0.26 AND ABS(1-kaishidi/zuixiaodi)<0.01
 	AND  zuidashangyingxianfudu<8 AND zuidaxiayingxianfudu<6)	
 	--SELECT * FROM T5	 		
 ,T590 AS (
@@ -106,35 +106,35 @@ WHERE riqi>='2024-01-01' AND riqi<='2024-02-22'
 	WHERE (shangyingxianfudu<=4 AND xiayingxianfudu<=1)
 	--任何一天满足光头或者任何一天满足光脚
 	OR (shangyingxianfudu=0 OR  xiayingxianfudu=0))	 
-	--SELECT * FROM T590  WHERE code='sz.000581'
+	--SELECT * FROM T590 
+
 ,T501 AS (
-	SELECT code,kaishiriqi,zhuyiriqi,jieshuriqi	
-	FROM T590)
-	--SELECT * FROM T501		
-,T599 AS 
-(				
-	SELECT T590.*
-	FROM T590 
-	LEFT JOIN T3 AS A ON T590.code = A.code  AND T590.zhuyiriqi = A.riqi
-	LEFT JOIN T3 AS B ON A.code = B.code  AND A.riqihao+1=  B.riqihao
-	WHERE (A.kai<B.shou AND A.shou>B.kai AND B.pctChg<0 ) OR (A.kai<B.kai AND A.shou>B.shou AND B.pctChg>0))	 
-    --SELECT * FROM T599				
-,T600 AS (
-	SELECT T599.*,T3.di AS quanbukaishidi,B.di AS ds
-	FROM T599 
-	INNER JOIN T3 ON T599.code = T3.code AND T599.kaishiriqi=T3.riqi
-	INNER JOIN T3 AS A ON T599.code = A.code AND T599.zhuyiriqi=A.riqi
-	INNER JOIN T6  AS B ON T599.code = B.code  AND B.quanbuzuixiaodi=1
-	WHERE   B.quanbuzuixiaodi=1 AND  T3.di>T3.kai/1.022 AND  A.di>A.kai/1.018 AND T3.kai/1.03<A.kai AND  T3.di/1.018<B.di
-	 )		
-	---SELECT * FROM T600  
+	SELECT DISTINCT code,kaishiriqi,jieshuriqi,yangxianshu,yinxianshu	
+	FROM T590
+	WHERE yangxianshu>yinxianshu)
+	--SELECT * FROM T501	
+,T502 AS (
+	SELECT T401.*,kaishiriqi 	
+	FROM  T401 LEFT JOIN T501 ON T401.code = T501.code  and  T401.riqi = T501.kaishiriqi 
+	WHERE  T501.kaishiriqi IS NOT NULL)
+,T503 AS (
+	SELECT T401.*,jieshuriqi 
+	FROM  T401 LEFT JOIN T501 ON T401.code = T501.code  and  T401.riqi = T501.jieshuriqi 
+	WHERE  T501.jieshuriqi IS NOT NULL)	
+
+,T599 AS (				
+	SELECT A.kaishiriqi,B.jieshuriqi,A.code
+	FROM T502 AS A INNER JOIN T503 AS B	ON A.code=B.code
+	INNER JOIN T AS C ON C.code=B.code AND B.riqihao+1=C.riqihao
+	WHERE B.pctChg>0 AND A.shou<B.shou  AND A.di<B.di AND B.val<0 AND B.shou>C.maxval)
+	--SELECT * FROM T599 
 	 
 	
 	--SELECT DISTINCT zuidalianxushangzhangshu,zuidadiehuozezuixiaozhang,zuidashou,suoyoumanzu,zhangdiezhouqishu,kaishiriqi,jieshuriqi,ISNULL(yangxianshu,0) AS yangxianshu,ISNULL(yinxianshu,0) AS yinxianshu,ISNULL(wushangyingxianfudushu,0) AS wushangyingxianfudushu,ISNULL(wuxiayingxianfudushu,0) AS wuxiayingxianfudushu,code
 	INSERT INTO T10002([kaishiriqi],[jieshuriqi]   ,[code])
-	SELECT DISTINCT  kaishiriqi,zhuyiriqi,code		
+	SELECT DISTINCT  kaishiriqi,jieshuriqi,code		
 	--INTO T10002
-	FROM T600   
+	FROM T599   
 	--WHERE yangxianshu>=yinxianshu
 	--ORDER BY zuidashou desc
 	

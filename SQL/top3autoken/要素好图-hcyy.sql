@@ -81,7 +81,7 @@ WHERE riqi>='2018-02-28' AND riqi<='2018-03-26' AND code='sz.300584'
 ,T5 AS (
 	SELECT *
 	FROM  T10  
-	WHERE 1-kaishigao/zuidagao<0.10  AND 1-zuixiaodi/kaishidi<0.10
+	WHERE zuidagao/kaishigao-1<0.10  AND ABS(1-kaishidi/zuixiaodi)<0.10
 	AND  zuidashangyingxianfudu<5 AND zuidaxiayingxianfudu<5)	
 	--SELECT * FROM T5	 		
 ,T590 AS (
@@ -96,7 +96,7 @@ WHERE riqi>='2018-02-28' AND riqi<='2018-03-26' AND code='sz.300584'
 	FROM T590 
 	WHERE yangxianshu>yinxianshu)
 	--SELECT * FROM T501	
- ,T502 AS (
+,T502 AS (
 	SELECT T3.*,kaishiriqi 	
 	FROM  T3 LEFT JOIN T501 ON T3.code = T501.code  and  T3.riqi = T501.kaishiriqi 
 	WHERE  T501.kaishiriqi IS NOT NULL)
@@ -107,7 +107,7 @@ WHERE riqi>='2018-02-28' AND riqi<='2018-03-26' AND code='sz.300584'
 ,T599 AS (				
 	SELECT A.kaishiriqi,B.jieshuriqi,A.code
 	FROM T502 AS A INNER JOIN T503 AS B	ON A.code=B.code
-	WHERE B.pctChg>0 AND B.di=B.kai	AND 1- B.di/A.di<0.02   AND 1-B.gao/A.gao<0.02)
+	WHERE B.pctChg>0 AND B.di=B.kai	AND ABS(1- A.di/B.di)<0.02   AND A.gao/B.gao-1<0.02)
 	 --SELECT * FROM T599
 
 	--SELECT DISTINCT zuidalianxushangzhangshu,zuidadiehuozezuixiaozhang,zuidashou,suoyoumanzu,zhangdiezhouqishu,kaishiriqi,jieshuriqi,ISNULL(yangxianshu,0) AS yangxianshu,ISNULL(yinxianshu,0) AS yinxianshu,ISNULL(wushangyingxianfudushu,0) AS wushangyingxianfudushu,ISNULL(wuxiayingxianfudushu,0) AS wuxiayingxianfudushu,code

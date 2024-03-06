@@ -91,7 +91,7 @@ WHERE   riqi >='2021-02-10' and riqi <='2021-03-11' AND code='sh.600956'
 ,T5 AS (
 	SELECT T499.*,(SELECT zuidalianxushangzhangshu FROM T10 WHERE T10.code=T499.code) AS zuidalianxushangzhangshu
 	FROM  T499 
-	WHERE 1-kaishigao/zuidagao<0.07  AND 1-zuixiaodi/kaishidi<0.05
+	WHERE zuidagao/kaishigao-1<0.07  AND ABS(1-kaishidi/zuixiaodi)<0.05
 	AND  zuidashangyingxianfudu<4 AND zuidaxiayingxianfudu<4)		
 	--SELECT * FROM T5	 		
 ,T590 AS (
@@ -102,12 +102,12 @@ WHERE   riqi >='2021-02-10' and riqi <='2021-03-11' AND code='sh.600956'
 	OR (shangyingxianfudu=0 OR  xiayingxianfudu=0))	 
 	--SELECT * FROM T590 
 
-	,T501 AS (
+,T501 AS (
 	SELECT DISTINCT code,kaishiriqi,jieshuriqi,yangxianshu,yinxianshu	
 	FROM T590
 	WHERE yangxianshu>yinxianshu)
 	--SELECT * FROM T501	
- ,T502 AS (
+,T502 AS (
 	SELECT T3.*,kaishiriqi 	
 	FROM  T3 LEFT JOIN T501 ON T3.code = T501.code  and  T3.riqi = T501.kaishiriqi 
 	WHERE  T501.kaishiriqi IS NOT NULL)
@@ -118,7 +118,7 @@ WHERE   riqi >='2021-02-10' and riqi <='2021-03-11' AND code='sh.600956'
 ,T599 AS (				
 	SELECT A.kaishiriqi,B.jieshuriqi,A.code
 	FROM T502 AS A INNER JOIN T503 AS B	ON A.code=B.code
-	WHERE B.pctChg>0 AND 1-A.maxval/B.maxval<0.02 AND B.maxval>A.maxval)	
+	WHERE B.pctChg>0 AND ABS(1-A.maxval/B.maxval)<0.02 AND B.maxval>A.maxval)	
 	--SELECT * FROM T599 
 	--SELECT DISTINCT zuidalianxushangzhangshu,zuidadiehuozezuixiaozhang,zuidashou,suoyoumanzu,zhangdiezhouqishu,kaishiriqi,jieshuriqi,ISNULL(yangxianshu,0) AS yangxianshu,ISNULL(yinxianshu,0) AS yinxianshu,ISNULL(wushangyingxianfudushu,0) AS wushangyingxianfudushu,ISNULL(wuxiayingxianfudushu,0) AS wuxiayingxianfudushu,code
 	INSERT INTO T10000([kaishiriqi],[jieshuriqi]   ,[code])

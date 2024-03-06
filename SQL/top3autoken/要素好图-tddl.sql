@@ -91,7 +91,7 @@ WHERE riqi >='2021-02-26' and riqi <='2021-03-19' AND code='sz.002576'
 ,T5 AS (
 	SELECT *
 	FROM  T10 
-	WHERE 1-kaishigao/zuidagao<0.05  AND 1-zuixiaodi/kaishidi<0.09
+	WHERE zuidagao/kaishigao-1<0.05  AND ABS(1-kaishidi/zuixiaodi)<0.09
 	AND  zuidashangyingxianfudu<7 AND zuidaxiayingxianfudu<4)	
 	--SELECT * FROM T5	 		
 ,T590 AS (
@@ -106,7 +106,7 @@ WHERE riqi >='2021-02-26' and riqi <='2021-03-19' AND code='sz.002576'
 	FROM T590
 	WHERE yangxianshu>yinxianshu)
 	--SELECT * FROM T501	
- ,T502 AS (
+,T502 AS (
 	SELECT T3.*,kaishiriqi 	
 	FROM  T3 LEFT JOIN T501 ON T3.code = T501.code  and  T3.riqi = T501.kaishiriqi 
 	WHERE  T501.kaishiriqi IS NOT NULL)
@@ -117,7 +117,7 @@ WHERE riqi >='2021-02-26' and riqi <='2021-03-19' AND code='sz.002576'
 ,T599 AS (				
 	SELECT A.kaishiriqi,B.jieshuriqi,A.code
 	FROM T502 AS A INNER JOIN T503 AS B	ON A.code=B.code
-	WHERE B.pctChg>0 AND A.shou<B.shou  AND 1-A.shou/B.di<0.019)	
+	WHERE B.pctChg>0 AND A.shou<B.shou  AND ABS(1-A.shou/B.di)<0.019)	
 	--SELECT * FROM T599 	
  
 			
