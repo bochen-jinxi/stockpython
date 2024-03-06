@@ -15,7 +15,6 @@ FROM lishijiager
 WHERE riqi>='2020-11-02' AND riqi<='2020-11-20' AND code='sz.002466' 
 --WHERE riqi>='2024-01-01' AND riqi<='2024-02-21' 
 --SELECT * FROM T90
-
 ;WITH T AS (
 	SELECT riqihao,(shou - kai)/kai*100 AS shitifudu,[code],[riqi],
 	[kai],[shou],[di],[gao],[chengjiaoliang],[pctChg],
@@ -28,9 +27,14 @@ WHERE riqi>='2020-11-02' AND riqi<='2020-11-20' AND code='sz.002466'
 	--SELECT * FROM T3		
 ,T401 AS ( 
 	--找跳空
-	SELECT T.*,T.kai-A.maxval AS val 
+	SELECT T.*,
+	CASE
+        WHEN T.kai>A.shou THEN T.kai/A.shou-1 -- 当前值大于前值
+        WHEN T.kai<A.shou THEN 1-A.shou/T.kai -- 当前值小于前值
+        ELSE 0 -- 当前值等于前值
+        END AS val 
 	FROM T INNER JOIN T AS A ON T.code = A.code 
-	WHERE T.riqihao+1=a.riqihao)
+	WHERE T.riqihao+1=A.riqihao)
 	--SELECT * FROM T401
 ,T402 AS ( 
 	SELECT ROW_NUMBER() OVER (PARTITION BY code ORDER BY riqihao DESC) AS RowID,* 
@@ -40,7 +44,7 @@ WHERE riqi>='2020-11-02' AND riqi<='2020-11-20' AND code='sz.002466'
 ,T403 AS ( 
 	SELECT * 
 	FROM T402 
-	WHERE RowID=1  AND riqihao>=16-2)
+	WHERE RowID=1  AND riqihao>=15-2)
 	--SELECT * FROM T403
 ,T4 AS ( 
 	SELECT *

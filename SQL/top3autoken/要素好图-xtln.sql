@@ -29,7 +29,12 @@ WHERE   riqi >='2021-02-10' and riqi <='2021-03-11' AND code='sh.600956'
     --SELECT * FROM T3	
 ,T401 AS ( 
 	--找跳空
-	SELECT T.*,1-A.maxval/T.kai AS val
+	SELECT T.*,
+	CASE
+        WHEN T.kai>A.shou THEN T.kai/A.shou-1 -- 当前值大于前值
+        WHEN T.kai<A.shou THEN 1-A.shou/T.kai -- 当前值小于前值
+        ELSE 0 -- 当前值等于前值
+        END AS val  
 	FROM T INNER JOIN T AS A ON T.code = A.code 
 	WHERE T.riqihao+1=A.riqihao)
 	--SELECT * FROM T401
