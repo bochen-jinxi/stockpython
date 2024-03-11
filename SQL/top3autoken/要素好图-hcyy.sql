@@ -12,8 +12,8 @@ SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi Desc) AS riqihao,*
 INTO T90
 FROM lishijiager
 --海辰药业
-WHERE riqi>='2018-02-28' AND riqi<='2018-03-26' AND code='sz.300584' 
---WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'  
+--WHERE riqi>='2018-02-28' AND riqi<='2018-03-26' AND code='sz.300584' 
+WHERE riqi>='2023-12-01' AND riqi<='2024-03-08'  
 --SELECT * FROM T90
 
 ;WITH T AS (
@@ -115,6 +115,6 @@ WHERE riqi>='2018-02-28' AND riqi<='2018-03-26' AND code='sz.300584'
 	SELECT DISTINCT  kaishiriqi,jieshuriqi,code		
 	--INTO T10000
 	FROM T599  
-	--ORDER BY zuidashou desc
+	
 	
 	 

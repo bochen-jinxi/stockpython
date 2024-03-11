@@ -12,8 +12,8 @@ SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi Desc) AS riqihao,*
 INTO T90
 FROM lishijiager
 --蓝思科技
-WHERE riqi>='2019-08-13' AND riqi<='2019-08-26' AND code='sz.300433' 
---WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'  
+--WHERE riqi>='2019-08-13' AND riqi<='2019-08-26' AND code='sz.300433' 
+WHERE riqi>='2023-12-01' AND riqi<='2024-03-08'  
 --SELECT * FROM T90
 
 ;WITH T AS (
@@ -112,12 +112,11 @@ WHERE riqi>='2019-08-13' AND riqi<='2019-08-26' AND code='sz.300433'
 	--任何一天满足光头或者任何一天满足光脚
 	OR (shangyingxianfudu=0 OR  xiayingxianfudu=0))	 
 	--SELECT * FROM T590 
-	,T501 AS (
+,T501 AS (
 	SELECT DISTINCT code,kaishiriqi,jieshuriqi,yangxianshu,yinxianshu	
 	FROM T590
 	WHERE yangxianshu>=yinxianshu)
 	--SELECT * FROM T501	
-	--SELECT * FROM T401
 ,T502 AS (
 	SELECT T401.*,kaishiriqi 	
 	FROM  T401 LEFT JOIN T501 ON T401.code = T501.code  and  T401.riqi = T501.kaishiriqi 
@@ -131,7 +130,8 @@ WHERE riqi>='2019-08-13' AND riqi<='2019-08-26' AND code='sz.300433'
 ,T599 AS (				
 	SELECT A.kaishiriqi,B.jieshuriqi,A.code,B.val
 	FROM T502 AS A INNER JOIN T503 AS B	ON A.code=B.code
-	WHERE  A.shou<B.shou  AND A.di<B.di AND B.val<0 AND B.kai/B.di-1<0.01
+	INNER JOIN T AS C ON C.code=B.code AND B.riqihao+1=C.riqihao
+	WHERE  A.shou<B.shou  AND A.di<B.di AND B.val<0 AND B.kai/B.di-1<0.01 AND C.maxval>B.shou
 	)
 	--SELECT * FROM T599  
 	--SELECT DISTINCT zuidalianxushangzhangshu,zuidadiehuozezuixiaozhang,zuidashou,suoyoumanzu,zhangdiezhouqishu,kaishiriqi,jieshuriqi,ISNULL(yangxianshu,0) AS yangxianshu,ISNULL(yinxianshu,0) AS yinxianshu,ISNULL(wushangyingxianfudushu,0) AS wushangyingxianfudushu,ISNULL(wuxiayingxianfudushu,0) AS wuxiayingxianfudushu,code

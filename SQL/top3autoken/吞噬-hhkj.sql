@@ -12,8 +12,8 @@ SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi Desc) AS riqihao,*
 INTO T90
 FROM lishijiager
 --»ªºê¿Æ¼¼
-WHERE riqi>='2021-01-14' AND riqi<='2021-02-09' AND code='sz.002645' 
---WHERE riqi>='2023-12-01' AND riqi<='2024-01-30'  
+--WHERE riqi>='2021-01-14' AND riqi<='2021-02-09' AND code='sz.002645' 
+WHERE riqi>='2023-12-01' AND riqi<='2024-03-08'  
 --SELECT * FROM T90
 
 ;WITH T AS (
@@ -132,7 +132,7 @@ WHERE riqi>='2021-01-14' AND riqi<='2021-02-09' AND code='sz.002645'
 	SELECT A.kaishiriqi,B.jieshuriqi,A.code,B.val
 	FROM T502 AS A INNER JOIN T503 AS B	ON A.code=B.code
 	INNER JOIN T AS C ON C.code=B.code AND B.riqihao+1=C.riqihao
-	WHERE B.pctChg>0 AND A.shou<B.shou  AND A.di<B.di AND B.val<0 AND B.shou>C.maxval)
+	WHERE B.pctChg>0 AND A.shou<B.shou  AND A.di<B.di AND B.val<0 AND ((C.pctChg<0  AND B.shou>C.maxval AND B.kai<C.shou) OR (C.pctChg>0  AND B.shou>C.maxval AND B.kai<C.kai)))
 	--SELECT * FROM T599 
 	 
 	--SELECT DISTINCT zuidalianxushangzhangshu,zuidadiehuozezuixiaozhang,zuidashou,suoyoumanzu,zhangdiezhouqishu,kaishiriqi,jieshuriqi,ISNULL(yangxianshu,0) AS yangxianshu,ISNULL(yinxianshu,0) AS yinxianshu,ISNULL(wushangyingxianfudushu,0) AS wushangyingxianfudushu,ISNULL(wuxiayingxianfudushu,0) AS wuxiayingxianfudushu,code
