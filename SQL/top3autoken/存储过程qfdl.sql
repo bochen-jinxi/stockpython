@@ -1,67 +1,66 @@
-USE stock;
+ï»¿USE stock;
 GO
 
-IF OBJECT_ID('dbo.sphcyy', 'P') IS NOT NULL
-    DROP PROCEDURE dbo.sphcyy;
+IF OBJECT_ID('dbo.spqfdl', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.spqfdl;
 GO
 
-CREATE PROCEDURE dbo.sphcyy
+CREATE PROCEDURE dbo.spqfdl
     @StartDate DATE = NULL,
     @EndDate DATE = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Èç¹ûÈÕÆÚÎª NULL£¬×Ô¶¯ÉèÎª×î½ü60Ìì
+    -- è‡ªåŠ¨è®¾ç½®é»˜è®¤æ—¥æœŸï¼ˆæœ€è¿‘60å¤©ï¼‰
     IF @EndDate IS NULL
         SET @EndDate = CAST(GETDATE() AS DATE);
 
     IF @StartDate IS NULL
         SET @StartDate = DATEADD(DAY, -60, @EndDate);
 
-    PRINT 'Ö´ÐÐÈÕÆÚ·¶Î§£º' + CONVERT(VARCHAR(10), @StartDate) + ' µ½ ' + CONVERT(VARCHAR(10), @EndDate);
+    PRINT 'æ‰§è¡Œæ—¥æœŸèŒƒå›´ï¼š' + CONVERT(VARCHAR(10), @StartDate) + ' åˆ° ' + CONVERT(VARCHAR(10), @EndDate);
 
-    -- É¾³ýÁÙÊ±±í£¨±ÜÃâ³åÍ»£©
+    -- æ¸…ç†å±€éƒ¨ä¸´æ—¶è¡¨
     IF OBJECT_ID('tempdb..#T90') IS NOT NULL DROP TABLE #T90;
 
-    -- Step 1: È¡³ö×î½ü60ÌìµÄÀúÊ·Êý¾Ý²¢±àºÅ
+    -- Step 1: ç¼–å·æœ€è¿‘60å¤©æ•°æ®
     SELECT 
         ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi DESC) AS riqihao,
         *
     INTO #T90
     FROM lishijiager
-	--º£³½Ò©Òµ
---WHERE riqi>='2018-02-28' AND riqi<='2018-03-26' AND code='sz.300584' 
+	--èµ·å¸†ç”µç¼†
+--WHERE   riqi >='2021-02-18' and riqi <='2021-03-11' AND code='sh.605222'
     WHERE riqi >= @StartDate AND riqi <= @EndDate;
 
-    -- ºóÐøÂß¼­²»±ä£¨ÓëÇ°Ãæ´æ´¢¹ý³ÌÒ»ÖÂ£©
     ;WITH T AS (
         SELECT 
             riqihao,
             (shou - kai) / kai * 100 AS shitifudu,
-            [code], [riqi], [kai], [shou], [di], [gao], [chengjiaoliang], [pctChg],
+            code, riqi, kai, shou, di, gao, chengjiaoliang, pctChg,
             IIF(shou >= kai, shou, kai) AS maxval,
             IIF(shou <= kai, shou, kai) AS minval
         FROM #T90
-        WHERE riqihao <= 20
+        WHERE riqihao <= 16
     ),
     T3 AS (
         SELECT 
             ROW_NUMBER() OVER (PARTITION BY code ORDER BY shitifudu DESC) AS RowID,
             *,
-            (gao / maxVal - 1) * 100 AS shangyingxianfudu,
+            (gao / maxval - 1) * 100 AS shangyingxianfudu,
             (minval / di - 1) * 100 AS xiayingxianfudu
         FROM T
     ),
     T4 AS (
         SELECT *
         FROM T3
-        WHERE RowID = 1 AND riqihao >= 19-3
+        WHERE RowID = 1 AND riqihao >= 15-3
     ),
     T499 AS (
         SELECT 
             COUNT(1) OVER (PARTITION BY T3.code) AS zhangdiezhouqishu,
-            T3.[pctChg],
+            T3.pctChg,
             T4.di AS kaishidi,
             T4.gao AS kaishigao,
             T4.code,
@@ -77,7 +76,7 @@ BEGIN
             COUNT(CASE WHEN T3.xiayingxianfudu = 0 THEN 1 END) OVER(PARTITION BY T3.code) AS wuxiayingxianfudushu,
             COUNT(CASE WHEN T3.pctChg >= 0 THEN 1 END) OVER(PARTITION BY T3.code) AS yangxianshu,
             COUNT(CASE WHEN T3.pctChg < 0 THEN 1 END) OVER(PARTITION BY T3.code) AS yinxianshu,
-            MIN(T3.[pctChg]) OVER (PARTITION BY T3.code) AS zuidadiehuozezuixiaozhang,
+            MIN(T3.pctChg) OVER (PARTITION BY T3.code) AS zuidadiehuozezuixiaozhang,
             MAX(T3.gao) OVER (PARTITION BY T3.code) AS zuidagao,
             MIN(T3.di) OVER (PARTITION BY T3.code) AS zuixiaodi,
             MAX(T3.shou) OVER (PARTITION BY T3.code) AS zuidashou,
@@ -115,18 +114,19 @@ BEGIN
         FROM T8
     ),
     T10 AS (
-        SELECT *
+        SELECT TOP 1 *
         FROM T9
-        WHERE zuidalianxushangzhangshu >= 6
+        WHERE zuidalianxushangzhangshu >= 3
     ),
     T5 AS (
-        SELECT *
-        FROM T10
+        SELECT *,
+            (SELECT zuidalianxushangzhangshu FROM T10 WHERE T10.code = T499.code) AS zuidalianxushangzhangshu
+        FROM T499
         WHERE 
-            zuidagao / kaishigao - 1 < 0.10 AND 
-            ABS(1 - kaishidi / zuixiaodi) < 0.10 AND 
-            zuidashangyingxianfudu < 5 AND 
-            zuidaxiayingxianfudu < 5
+            zuidagao / kaishigao - 1 < 0.05 AND 
+            ABS(1 - kaishidi / zuixiaodi) < 0.09 AND 
+            zuidashangyingxianfudu < 7 AND 
+            zuidaxiayingxianfudu < 4
     ),
     T590 AS (
         SELECT 
@@ -134,12 +134,11 @@ BEGIN
             * 
         FROM T5  
         WHERE 
-            (shangyingxianfudu <= 0.5 AND xiayingxianfudu <= 0.5)
+            (shangyingxianfudu <= 2 AND xiayingxianfudu <= 2)
             OR (shangyingxianfudu = 0 OR xiayingxianfudu = 0)
     ),
     T501 AS (
-        SELECT DISTINCT 
-            code, kaishiriqi, jieshuriqi, yangxianshu, yinxianshu
+        SELECT DISTINCT code, kaishiriqi, jieshuriqi, yangxianshu, yinxianshu
         FROM T590 
         WHERE yangxianshu > yinxianshu
     ),
@@ -164,17 +163,16 @@ BEGIN
         INNER JOIN T503 AS B ON A.code = B.code
         WHERE 
             B.pctChg > 0 AND 
-            B.di = B.kai AND 
-            ABS(1 - A.di / B.di) < 0.02 AND 
-            A.gao / B.gao - 1 < 0.02
+            A.di = A.kai AND 
+            B.shou < A.shou AND 
+            B.di < A.di
     )
-    
-    -- ²åÈë×îÖÕ½á¹û
+
+    -- æ’å…¥ç»“æžœ
     INSERT INTO T10000 ([kaishiriqi], [jieshuriqi], [code])
     SELECT DISTINCT kaishiriqi, jieshuriqi, code
     FROM T599;
 
-    PRINT '? É¸Ñ¡Íê³É£¬ÒÑ½«½á¹ûÐ´Èë T10000';
-
+    PRINT 'âœ… æ‰§è¡Œå®Œæˆï¼Œç»“æžœå†™å…¥ T10000';
 END;
 GO
