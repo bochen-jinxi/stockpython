@@ -28,7 +28,7 @@ BEGIN
     INTO #T90
     FROM lishijiager
 	--通达动力
---WHERE riqi >='2021-02-26' and riqi <='2021-03-19' AND code='sz.002576' 
+--WHERE riqi >='2021-02-26' and riqi <='2021-03-19' AND code='002576' 
     WHERE riqi >= @StartDate AND riqi <= @EndDate;
 
     ;WITH T AS (

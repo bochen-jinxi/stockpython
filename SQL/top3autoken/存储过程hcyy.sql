@@ -31,9 +31,9 @@ BEGIN
     INTO #T90
     FROM lishijiager
 	--海辰药业
---WHERE riqi>='2018-02-28' AND riqi<='2018-03-26' AND code='sz.300584' 
+--WHERE riqi>='2018-02-28' AND riqi<='2018-03-26' AND code='300584' 
     WHERE riqi >= @StartDate AND riqi <= @EndDate;
-
+   
     -- 后续逻辑不变（与前面存储过程一致）
     ;WITH T AS (
         SELECT 
@@ -44,7 +44,8 @@ BEGIN
             IIF(shou <= kai, shou, kai) AS minval
         FROM #T90
         WHERE riqihao <= 20
-    ),
+    )
+	,
     T3 AS (
         SELECT 
             ROW_NUMBER() OVER (PARTITION BY code ORDER BY shitifudu DESC) AS RowID,
@@ -166,7 +167,7 @@ BEGIN
             B.pctChg > 0 AND 
             B.di = B.kai AND 
             ABS(1 - A.di / B.di) < 0.02 AND 
-            A.gao / B.gao - 1 < 0.02
+            A.gao / B.gao - 1 < 0.03
     )
     
     -- 插入最终结果

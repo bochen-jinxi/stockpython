@@ -2,10 +2,10 @@ USE stock
 GO
 
 IF OBJECT_ID('dbo.splskj', 'P') IS NOT NULL
-    DROP PROCEDURE dbo.Sp_ZhuoYaoDai
+    DROP PROCEDURE dbo.splskj
 GO
 
-CREATE PROCEDURE dbo.Sp_ZhuoYaoDai
+CREATE PROCEDURE dbo.splskj
     @StartDate DATE = NULL,      -- 开始日期（可选）
     @EndDate   DATE = NULL,      -- 结束日期（可选）
     @Days      INT  = 60        -- 默认最近60天
@@ -31,7 +31,7 @@ BEGIN
     INTO #T90
     FROM lishijiager
 	--蓝思科技
---WHERE riqi>='2019-08-13' AND riqi<='2019-08-26' AND code='sz.300433' 
+--WHERE riqi>='2019-08-13' AND riqi<='2019-08-26' AND code='300433' 
     WHERE riqi BETWEEN @StartDate AND @EndDate
     
 
@@ -115,15 +115,20 @@ BEGIN
         SELECT * FROM T9 WHERE zuidalianxushangzhangshu>=2
     )
     ,T5 AS (
-        SELECT *
+        SELECT  zuidagao/kaishigao-1 AS c, zuixiaodi/kaishidi-1 AS d, *
         FROM T10
-        WHERE zuidagao/kaishigao-1<0.16 AND zuixiaodi/kaishidi-1<0.02
-          AND zuidashangyingxianfudu<6 AND zuidaxiayingxianfudu<4
+        WHERE 1=1 
+		AND zuidagao/kaishigao-1<0.2 
+		AND zuixiaodi/kaishidi-1<0.04
+         AND zuidashangyingxianfudu<6 
+		  AND zuidaxiayingxianfudu<4
     )
+	 
     ,T590 AS (
-        SELECT COUNT(1) OVER (PARTITION BY T5.code) AS suoyoumanzu ,*
+        SELECT shangyingxianfudu AS a,xiayingxianfudu AS b, COUNT(1) OVER (PARTITION BY T5.code) AS suoyoumanzu ,*
         FROM T5
-        WHERE (shangyingxianfudu<=4 AND xiayingxianfudu<=1)
+        WHERE 1=1
+		AND (shangyingxianfudu<=4 AND xiayingxianfudu<=2)
            OR (shangyingxianfudu=0 OR xiayingxianfudu=0)
     )
     ,T501 AS (
@@ -137,6 +142,7 @@ BEGIN
         LEFT JOIN T501 ON T401.code = T501.code AND T401.riqi = T501.kaishiriqi
         WHERE T501.kaishiriqi IS NOT NULL
     )
+ 
     ,T503 AS (
         SELECT T401.*,jieshuriqi
         FROM T401
@@ -148,9 +154,14 @@ BEGIN
         FROM T502 AS A
         INNER JOIN T503 AS B ON A.code=B.code
         INNER JOIN T AS C ON C.code=B.code AND B.riqihao+1=C.riqihao
-        WHERE A.shou<B.shou AND A.di<B.di AND B.val<0
-          AND B.kai/B.di-1<0.01 AND C.maxval>B.shou
+        WHERE  1=1
+		 AND A.shou<B.shou 
+		 AND A.di<B.di 
+		 AND B.val<0
+          --AND B.kai/B.di-1<0.01 
+		  AND C.maxval>B.shou
     )
+ 
     INSERT INTO T10001([kaishiriqi],[jieshuriqi],[code])
     SELECT DISTINCT kaishiriqi,jieshuriqi,code
     FROM T599;

@@ -27,9 +27,9 @@ BEGIN
     INTO #T90
     FROM lishijiager
 	--ÍòÍ¨ÖÇ¿Ø
---WHERE riqi >='2019-11-11' and riqi <='2019-11-29'  AND code='sz.300643' 
+--WHERE riqi >='2019-11-11' and riqi <='2019-11-29'  AND code='300643' 
     WHERE riqi >= @StartDate AND riqi <= @EndDate;
-
+	--SELECT * FROM #T90
     ;WITH T AS (
         SELECT riqihao,
                (shou - kai) / kai * 100 AS shitifudu,
@@ -51,6 +51,7 @@ BEGIN
         FROM T3
         WHERE RowID = 1 AND riqihao >= 14 - 3  -- (14 - 3)
     )
+	
     ,T499 AS (
         SELECT COUNT(1) OVER (PARTITION BY T3.code) AS zhangdiezhouqishu,
                T3.[pctChg],T4.di AS kaishidi,T4.gao AS kaishigao,
@@ -94,20 +95,23 @@ BEGIN
     ,T10 AS (
         SELECT * FROM T9 WHERE zuidalianxushangzhangshu >= 3
     )
+	
     ,T5 AS (
-        SELECT *
+        SELECT *, zuidagao/kaishigao-1 AS f
         FROM T10
-        WHERE zuidagao/kaishigao-1 < 0.15
+        WHERE  	 zuidagao/kaishigao-1 < 0.2
           AND zuixiaodi/kaishidi-1 < 0.07
           AND zuidashangyingxianfudu < 7
           AND zuidaxiayingxianfudu < 4
     )
+	
     ,T590 AS (
         SELECT COUNT(1) OVER (PARTITION BY T5.code) AS suoyoumanzu ,*
         FROM T5
         WHERE (shangyingxianfudu <= 0.5 AND xiayingxianfudu <= 0.5)
            OR (shangyingxianfudu = 0 OR xiayingxianfudu = 0)
     )
+	 
     ,T501 AS (
         SELECT DISTINCT code,kaishiriqi,jieshuriqi,yangxianshu,yinxianshu
         FROM T590
@@ -127,7 +131,7 @@ BEGIN
         SELECT A.kaishiriqi,B.jieshuriqi,A.code
         FROM T502 AS A
         INNER JOIN T503 AS B ON A.code = B.code
-        WHERE B.pctChg > 0 AND B.di/A.di-1 < 0.15
+        WHERE B.pctChg > 0 AND B.di/A.di-1 < 0.20
     )
     INSERT INTO T10000([kaishiriqi],[jieshuriqi],[code])
     SELECT DISTINCT kaishiriqi,jieshuriqi,code

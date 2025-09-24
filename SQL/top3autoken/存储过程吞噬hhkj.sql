@@ -26,16 +26,16 @@ BEGIN
     PRINT '开始日期: ' + CONVERT(VARCHAR(10), @StartDate, 120);
     PRINT '结束日期: ' + CONVERT(VARCHAR(10), @EndDate, 120);
 
-    -- 清理旧的T90表
-    IF OBJECT_ID('dbo.T90', 'U') IS NOT NULL
-        DROP TABLE dbo.T90;
+ -- 避免旧表残留
+    IF OBJECT_ID('tempdb..#T90') IS NOT NULL
+        DROP TABLE #T90;
 
     -- 生成T90
     SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi DESC) AS riqihao, *
-    INTO dbo.T90
+    INTO  #T90
     FROM lishijiager
 --华宏科技
---WHERE riqi>='2021-01-14' AND riqi<='2021-02-09' AND code='sz.002645' 
+--WHERE riqi>='2021-01-14' AND riqi<='2021-02-09' AND code='002645' 
     WHERE riqi >= @StartDate AND riqi <= @EndDate;
 
     ;WITH T AS (
@@ -124,9 +124,9 @@ BEGIN
         SELECT * FROM T9 WHERE zuidalianxushangzhangshu >= 3
     )
     ,T5 AS (
-        SELECT *
+        SELECT zuidagao/kaishigao - 1 AS a,*
         FROM T10
-        WHERE zuidagao/kaishigao - 1 < 0.38 
+        WHERE		  zuidagao/kaishigao - 1 < 0.41 
           AND zuixiaodi/kaishidi - 1 < 0.01
           AND zuidashangyingxianfudu < 8 
           AND zuidaxiayingxianfudu < 4
@@ -153,11 +153,12 @@ BEGIN
         INNER JOIN T501 ON T401.code = T501.code AND T401.riqi = T501.jieshuriqi
     )
     ,T599 AS (
-        SELECT A.kaishiriqi, B.jieshuriqi, A.code, B.val
+        SELECT A.kaishiriqi, B.jieshuriqi, A.code, B.val,A.shou AS a , B.shou  AS  b 
         FROM T502 AS A
         INNER JOIN T503 AS B ON A.code = B.code
         INNER JOIN T AS C ON C.code = B.code AND B.riqihao + 1 = C.riqihao
-        WHERE B.pctChg > 0 
+        WHERE
+		 B.pctChg > 0 
           AND A.shou < B.shou  
           AND A.di < B.di 
           AND B.val < 0 

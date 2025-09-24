@@ -30,7 +30,7 @@ BEGIN
     INTO #T90
     FROM lishijiager
 	--ÌìÆëï®Òµ
---WHERE riqi>='2020-11-02' AND riqi<='2020-11-20' AND code='sz.002466' 
+--WHERE riqi>='2020-11-02' AND riqi<='2020-11-20' AND code='002466' 
     WHERE riqi >= @StartDate AND riqi <= @EndDate;
 
     ;WITH T AS (
@@ -107,13 +107,14 @@ BEGIN
         SELECT * FROM T9 WHERE zuidalianxushangzhangshu>=3
     )
     ,T5 AS (
-        SELECT *,1-kaishidi/zuixiaodi AS dfgdfgdfgd
+        SELECT  zuidagao/kaishigao-1 AS a, *,1-kaishidi/zuixiaodi AS dfgdfgdfgd
         FROM T10
-        WHERE zuidagao/kaishigao-1<0.26 
+        WHERE zuidagao/kaishigao-1<0.38 
           AND ABS(1-kaishidi/zuixiaodi)<0.01
           AND zuidashangyingxianfudu<8 
           AND zuidaxiayingxianfudu<6
     )
+
     ,T590 AS (
         SELECT COUNT(1) OVER (PARTITION BY T5.code) AS suoyoumanzu,* 
         FROM T5

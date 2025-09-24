@@ -31,7 +31,7 @@ BEGIN
     INTO #T90
     FROM lishijiager
 	--起帆电缆
---WHERE   riqi >='2021-02-18' and riqi <='2021-03-11' AND code='sh.605222'
+--WHERE   riqi >='2021-02-18' and riqi <='2021-03-11' AND code='605222'
     WHERE riqi >= @StartDate AND riqi <= @EndDate;
 
     ;WITH T AS (

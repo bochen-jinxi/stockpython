@@ -17,18 +17,15 @@ BEGIN
     -- 清理临时表
     IF OBJECT_ID('tempdb..#T90') IS NOT NULL DROP TABLE #T90;
 
-    -- 计算日期范围
-    DECLARE @s DATE, @e DATE;
+
+    -- 如果没传日期，默认取最近 @Days 天
     IF @StartDate IS NULL OR @EndDate IS NULL
     BEGIN
-        SET @e = ISNULL(@EndDate, CAST(GETDATE() AS DATE));
-        SET @s = ISNULL(@StartDate, DATEADD(DAY, -@Days, @e));
-    END
-    ELSE
-    BEGIN
-        SET @s = @StartDate;
-        SET @e = @EndDate;
-    END
+        SELECT 
+            @EndDate = MAX(riqi),
+            @StartDate = DATEADD(DAY, -@Days, MAX(riqi))
+        FROM lishijiager;
+    END;
 
     -- 装载原始数据
     SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi DESC) AS riqihao,
@@ -36,10 +33,10 @@ BEGIN
     INTO #T90
     FROM lishijiager
 	--南网能源
---WHERE riqi>='2021-02-25' AND riqi<='2021-03-10' AND code='sz.003035' 
+--WHERE riqi>='2021-02-25' AND riqi<='2021-03-10' AND code='003035' 
 --应众互联
 --WHERE riqi>='2020-04-01' AND riqi<='2020-04-15' AND code='sz.002464' 
-    WHERE riqi >= @s AND riqi <= @e;
+     WHERE riqi BETWEEN @StartDate AND @EndDate
 
     ;WITH T AS (
         SELECT riqihao,(shou - kai)/kai*100 AS shitifudu,[code],[riqi],
