@@ -4,8 +4,10 @@ import os
 from datetime import datetime, timedelta
 
 # 公共变量设置 - 默认最近6天
-END_DATE = (datetime.now()).strftime('%Y%m%d')  # 结束日期为今天
-START_DATE = (datetime.now() - timedelta(days=5)).strftime('%Y%m%d')  # 开始日期为5天前（包含今天共6天）
+# END_DATE = (datetime.now()).strftime('%Y%m%d')  # 结束日期为今天
+# START_DATE = (datetime.now() - timedelta(days=5)).strftime('%Y%m%d')  # 开始日期为5天前（包含今天共6天）
+START_DATE = '20210226'
+END_DATE = '20210310'
 
 # 输入股票代码文件路径
 input_file = r'D:\code.EBK'
