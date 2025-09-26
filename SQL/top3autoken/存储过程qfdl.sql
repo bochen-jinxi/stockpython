@@ -26,8 +26,13 @@ BEGIN
 
     -- Step 1: 编号最近60天数据
     SELECT 
-        ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi DESC) AS riqihao,
-        *
+                ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi DESC) AS riqihao,          
+		[code],[riqi],[kai], [shou],[di],
+ 		[gao], [chengjiaoliang],
+		IIF(LEN(code)=5,( CASE WHEN ( shou - kai ) > 0 THEN 1
+                               WHEN ( shou - kai ) = 0 THEN 0
+                               WHEN ( shou - kai ) < 0 THEN -1
+                          END ),[pctChg])		 AS  [pctChg]		
     INTO #T90
     FROM lishijiager
 	--起帆电缆

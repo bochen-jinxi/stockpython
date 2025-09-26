@@ -28,8 +28,13 @@ BEGIN
     END;
 
     -- 装载原始数据
-    SELECT ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi DESC) AS riqihao,
-           *
+    SELECT         ROW_NUMBER() OVER(PARTITION BY code ORDER BY riqi DESC) AS riqihao,          
+		[code],[riqi],[kai], [shou],[di],
+ 		[gao], [chengjiaoliang],
+		IIF(LEN(code)=5,( CASE WHEN ( shou - kai ) > 0 THEN 1
+                               WHEN ( shou - kai ) = 0 THEN 0
+                               WHEN ( shou - kai ) < 0 THEN -1
+                          END ),[pctChg])		 AS  [pctChg]		
     INTO #T90
     FROM lishijiager
 	--南网能源
