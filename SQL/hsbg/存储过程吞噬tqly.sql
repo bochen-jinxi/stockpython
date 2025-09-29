@@ -148,7 +148,13 @@ BEGIN
         FROM T502 AS A
         INNER JOIN T503 AS B ON A.code=B.code
         INNER JOIN T AS C ON C.code=B.code AND B.riqihao+1=C.riqihao
-        WHERE B.pctChg>0 AND A.shou<B.shou AND A.di<B.di AND B.val<0
+        WHERE
+	A.[pctChg]>0 
+	AND A.kai*1.03>B.kai
+	AND     C.kai>B.kai 
+ 
+		AND   IIF(C.[pctChg]<0, C.shou, C.kai)  /1.02<b.kai
+		B.pctChg>0 AND A.shou<B.shou AND A.di<B.di AND B.val<0
           AND ((C.pctChg<0 AND B.shou>C.maxval AND B.kai<C.shou)
             OR (C.pctChg>0 AND B.shou>C.maxval AND B.kai<C.kai))
     )

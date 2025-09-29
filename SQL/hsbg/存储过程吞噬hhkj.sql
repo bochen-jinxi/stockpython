@@ -41,7 +41,7 @@ BEGIN
     INTO  #T90
     FROM lishijiager
 --»ªºê¿Æ¼¼
---WHERE riqi>='2021-01-14' AND riqi<='2021-02-09' AND code='002645' 
+--WHERE riqi>='2021-01-14' AND riqi<='2021-02-09' AND code='sz.002645' 
     WHERE riqi >= @StartDate AND riqi <= @EndDate;
 
     ;WITH T AS (
@@ -164,9 +164,13 @@ BEGIN
         INNER JOIN T503 AS B ON A.code = B.code
         INNER JOIN T AS C ON C.code = B.code AND B.riqihao + 1 = C.riqihao
         WHERE
-		 B.pctChg > 0 
-          AND A.shou < B.shou  
-          AND A.di < B.di 
+		 1=1
+        AND  A.pctChg > 0 
+		  AND C.pctChg < 0  
+		AND  B.pctChg > 0   AND   IIF(C.[pctChg]<0, C.shou, C.kai)  /1.02<b.kai
+		AND    A.kai*1.03>B.kai
+         AND A.shou < B.shou  
+          AND A.di > B.di 
           AND B.val < 0 
           AND (
                 (C.pctChg < 0 AND B.shou > C.maxval AND B.kai < C.shou)

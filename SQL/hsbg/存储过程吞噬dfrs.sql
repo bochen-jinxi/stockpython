@@ -1,11 +1,11 @@
 USE stock
 GO
 
-IF OBJECT_ID('spcydl', 'P') IS NOT NULL
-    DROP PROCEDURE spcydl
+IF OBJECT_ID('spdfrs', 'P') IS NOT NULL
+    DROP PROCEDURE spdfrs
 GO
 
-CREATE PROCEDURE spcydl
+CREATE PROCEDURE spdfrs
     @StartDate DATE = NULL,      -- 开始日期，可选
     @EndDate   DATE = NULL,      -- 结束日期，可选
     @Days      INT  = 60         -- 默认最近60天
@@ -36,8 +36,8 @@ BEGIN
                           END ),[pctChg])		 AS  [pctChg]		
     INTO #T90
     FROM lishijiager
-	--长源电力
---WHERE riqi>='2021-02-26' AND riqi<='2021-03-10'  AND code='sz.000966' 
+--东方日升
+--WHERE riqi>='2020-11-14' AND riqi<='2020-12-10' AND code='sz.300118' 
     WHERE riqi >= @StartDate AND riqi <=@EndDate;
  
 
@@ -47,8 +47,10 @@ BEGIN
                IIF(shou>=kai,shou,kai)as maxval,
                IIF(shou<=kai,shou,kai) AS minval				
         FROM #T90
-        WHERE riqihao<=9
+        WHERE riqihao<=10
     )
+
+	 
     ,T3 AS ( 	 
         SELECT ROW_NUMBER() OVER (PARTITION BY code ORDER BY shitifudu DESC) AS RowID,
                *,
@@ -56,6 +58,7 @@ BEGIN
                (minval/di-1) *100 AS xiayingxianfudu
         FROM T
     )
+	--SELECT * FROM T
     ,T401 AS ( 
         -- 找跳空
         SELECT T.*,
@@ -67,7 +70,7 @@ BEGIN
         FROM T INNER JOIN T AS A ON T.code = A.code 
         WHERE T.riqihao+1=A.riqihao
     )
-
+	--SELECT * FROM T401
     ,T402 AS ( 
         SELECT ROW_NUMBER() OVER (PARTITION BY code ORDER BY val DESC) AS RowID,* 
         FROM T401 
@@ -76,8 +79,10 @@ BEGIN
     ,T4 AS ( 
         SELECT * 
         FROM T402 
-        WHERE RowID=1  AND riqihao>=8-2 AND val>0.029
+        WHERE RowID=1  AND riqihao>=8-2 
+		AND val>0.025
     )
+	--SELECT * FROM T4
     ,T499 AS (
         SELECT COUNT(1) OVER (PARTITION BY T3.code) AS zhangdiezhouqishu,T3.[pctChg],T4.di AS kaishidi,T4.gao AS kaishigao,
                T4.code,T4.riqi AS kaishiriqi,T3.riqi,MAX(T3.riqi) OVER (PARTITION BY T3.code) AS jieshuriqi,
@@ -97,6 +102,7 @@ BEGIN
         FROM T4 INNER JOIN T3 ON T4.code = T3.code AND T4.riqihao > T3.riqihao
         WHERE T4.RowID=1
     )
+	--SELECT * FROM T499
     ,T6	AS ( 
         SELECT ROW_NUMBER() OVER (PARTITION BY code ORDER BY riqi) AS riqihaoasc,*
         FROM T499
@@ -145,20 +151,24 @@ BEGIN
         SELECT T401.*,jieshuriqi 
         FROM  T401 LEFT JOIN T501 ON T401.code = T501.code  and  T401.riqi = T501.jieshuriqi 
         WHERE  T501.jieshuriqi IS NOT NULL
-    )
-    ,T599 AS (				
+    ) 
+ 		,T599 AS (		
         SELECT A.kaishiriqi,B.jieshuriqi,A.code
         FROM T502 AS A INNER JOIN T503 AS B	ON A.code=B.code
         INNER JOIN T401 AS C ON C.code=B.code AND B.riqihao+1=C.riqihao
         WHERE
 		1=1
-		AND  B.pctChg>0 AND B.kai>A.kai AND A.kai*1.05>B.kai  AND C.pctChg<0  AND C.Val<0
+		AND  B.pctChg>0 AND B.kai>A.kai AND A.kai*1.05>B.kai  AND C.pctChg<0  
+		AND C.Val>0
 		AND		 B.pctChg>0 AND A.shou<B.shou  AND B.di>A.di AND B.val<0 
           AND ((C.pctChg<0  AND B.shou>C.maxval AND B.kai<C.shou) 
             OR (C.pctChg>0  AND B.shou>C.maxval AND B.kai<C.kai))
-    )
+			)
+
+		
     INSERT INTO T10002([kaishiriqi],[jieshuriqi],[code])
     SELECT DISTINCT kaishiriqi,[jieshuriqi],code		
     FROM T599;
+	 
 END
 GO
