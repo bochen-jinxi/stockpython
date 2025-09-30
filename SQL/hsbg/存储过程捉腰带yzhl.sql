@@ -2,11 +2,11 @@ USE stock
 GO
 
 -- 如果已存在则删除
-IF OBJECT_ID('dbo.spnwny', 'P') IS NOT NULL
-    DROP PROCEDURE dbo.spnwny
+IF OBJECT_ID('dbo.spyzhl', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.spyzhl
 GO
 
-CREATE PROCEDURE dbo.spnwny
+CREATE PROCEDURE dbo.spyzhl
     @StartDate DATE = NULL,      -- 开始日期，可选
     @EndDate   DATE = NULL,      -- 结束日期，可选
     @Days      INT  = 60         -- 默认最近60天
@@ -37,9 +37,9 @@ BEGIN
                           END ),[pctChg])		 AS  [pctChg]		
     INTO #T90
     FROM lishijiager
-	--南网能源
---WHERE riqi>='2021-02-25' AND riqi<='2021-03-10' AND code='003035' 
-
+ 
+--应众互联
+--WHERE riqi>='2020-04-01' AND riqi<='2020-04-15' AND code='002464' 
      WHERE riqi BETWEEN @StartDate AND @EndDate
 
     ;WITH T AS (
@@ -48,7 +48,7 @@ BEGIN
                IIF(shou>=kai,shou,kai)as maxval,
                IIF(shou<=kai,shou,kai) AS minval				
         FROM #T90
-        WHERE riqihao<=10
+        WHERE riqihao<=7
     )
     ,T3 AS ( 	 
         SELECT ROW_NUMBER() OVER (PARTITION BY code ORDER BY shitifudu DESC) AS RowID,
@@ -76,7 +76,7 @@ BEGIN
     ,T403 AS ( 
         SELECT * 
         FROM T402 
-        WHERE RowID=1  AND riqihao>=9-3 AND val>0.02
+        WHERE RowID=1  AND riqihao>=6-3 AND val>0.02
     )
     ,T4 AS ( 
         SELECT * FROM T403
@@ -122,12 +122,12 @@ BEGIN
         FROM T8
     )
     ,T10 AS ( 
-        SELECT * FROM T9 WHERE zuidalianxushangzhangshu>= 2
+        SELECT * FROM T9 WHERE zuidalianxushangzhangshu>= 1
     )
     ,T5 AS (
         SELECT *
         FROM  T10  
-        WHERE kaishigao*1.25>zuidagao AND kaishidi/1.04<zuixiaodi
+        WHERE kaishigao*1.05>zuidagao AND kaishidi/1.06>zuixiaodi
         AND  zuidashangyingxianfudu<8 AND zuidaxiayingxianfudu<6
     )	
     ,T590 AS (
@@ -161,10 +161,10 @@ BEGIN
         WHERE 
 1=1
 		AND 
-		B.kai<C.di/1.07 AND B.shitifudu>0 AND  C.Val>0
-		AND 
+		B.kai<C.di/1.05 AND B.shitifudu>0 AND  C.Val=0		AND 
 		A.shou>B.shou AND A.di>B.di 
           AND  B.val<0 AND B.kai=B.di AND C.maxval>B.shou
+ 
     )	
     INSERT INTO T10001([kaishiriqi],[jieshuriqi],[code])
     SELECT DISTINCT kaishiriqi,jieshuriqi,code		

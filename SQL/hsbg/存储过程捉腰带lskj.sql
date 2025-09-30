@@ -161,6 +161,9 @@ BEGIN
         INNER JOIN T503 AS B ON A.code=B.code
         INNER JOIN T AS C ON C.code=B.code AND B.riqihao+1=C.riqihao
         WHERE  1=1
+		AND  A.kai*1.15>B.kai
+		  AND B.kai<C.di/1.01
+		  AND B.shitifudu>0
 		 AND A.shou<B.shou 
 		 AND A.di<B.di 
 		 AND B.val<0
