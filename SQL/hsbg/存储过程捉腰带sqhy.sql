@@ -153,8 +153,15 @@ BEGIN
         SELECT A.kaishiriqi,B.jieshuriqi,A.code,B.val
         FROM T502 AS A 
         INNER JOIN T503 AS B	ON A.code=B.code
-        INNER JOIN T AS C ON C.code=B.code AND B.riqihao+1=C.riqihao
-        WHERE  A.shou<B.shou  AND A.di<B.di AND B.val<0 AND B.di=B.kai AND C.maxval>B.shou
+        INNER JOIN T401 AS C ON C.code=B.code AND B.riqihao+1=C.riqihao
+        WHERE 
+			1=1 
+		AND 
+		C.val>0 AND B.kai<c.di/1.01 AND B.shitifudu>0
+
+		AND 
+		
+		 A.shou<B.shou  AND A.di<B.di AND B.val<0 AND B.di=B.kai AND C.maxval>B.shou
     )
     INSERT INTO T10001([kaishiriqi],[jieshuriqi],[code])
     SELECT DISTINCT kaishiriqi,jieshuriqi,code		
