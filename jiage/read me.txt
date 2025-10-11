@@ -1,0 +1,1 @@
+python jiagedak.py "C:\newstockpython\stockpython\jiage\code2.EBK" "C:\kak2"
