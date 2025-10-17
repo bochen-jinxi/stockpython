@@ -166,8 +166,8 @@ BEGIN
 			)
 
 		
-    INSERT INTO T10002([kaishiriqi],[jieshuriqi],[code])
-    SELECT DISTINCT kaishiriqi,[jieshuriqi],code		
+    INSERT INTO T10002([kaishiriqi],[jieshuriqi],[code],[name])
+    SELECT DISTINCT kaishiriqi,[jieshuriqi],code,'spdfrs'		
     FROM T599;
 	 
 END

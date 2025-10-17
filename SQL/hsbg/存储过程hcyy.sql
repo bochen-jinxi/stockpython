@@ -176,8 +176,8 @@ BEGIN
     )
     
     -- 插入最终结果
-    INSERT INTO T10000 ([kaishiriqi], [jieshuriqi], [code])
-    SELECT DISTINCT kaishiriqi, jieshuriqi, code
+    INSERT INTO T10000 ([kaishiriqi], [jieshuriqi], [code],[name])
+    SELECT DISTINCT kaishiriqi, jieshuriqi, code,'sphcyy'
     FROM T599;
 
     PRINT '? 筛选完成，已将结果写入 T10000';

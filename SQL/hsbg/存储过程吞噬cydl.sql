@@ -157,8 +157,8 @@ BEGIN
           AND ((C.pctChg<0  AND B.shou>C.maxval AND B.kai<C.shou) 
             OR (C.pctChg>0  AND B.shou>C.maxval AND B.kai<C.kai))
     )
-    INSERT INTO T10002([kaishiriqi],[jieshuriqi],[code])
-    SELECT DISTINCT kaishiriqi,[jieshuriqi],code		
+    INSERT INTO T10002([kaishiriqi],[jieshuriqi],[code],[name])
+    SELECT DISTINCT kaishiriqi,[jieshuriqi],code,'spcydl'		
     FROM T599;
 END
 GO

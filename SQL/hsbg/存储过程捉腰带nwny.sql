@@ -166,8 +166,8 @@ BEGIN
 		A.shou>B.shou AND A.di>B.di 
           AND  B.val<0 AND B.kai=B.di AND C.maxval>B.shou
     )	
-    INSERT INTO T10001([kaishiriqi],[jieshuriqi],[code])
-    SELECT DISTINCT kaishiriqi,jieshuriqi,code		
+    INSERT INTO T10001([kaishiriqi],[jieshuriqi],[code],[name])
+    SELECT DISTINCT kaishiriqi,jieshuriqi,code,'spnwny'		
     FROM T599;
 END
 GO

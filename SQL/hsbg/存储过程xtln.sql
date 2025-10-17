@@ -160,8 +160,8 @@ BEGIN
           AND ABS(1-A.maxval/B.maxval)<0.02
           AND B.maxval>A.maxval
     )
-    INSERT INTO T10000([kaishiriqi],[jieshuriqi],[code])
-    SELECT DISTINCT kaishiriqi,jieshuriqi,code
+    INSERT INTO T10000([kaishiriqi],[jieshuriqi],[code],[name])
+    SELECT DISTINCT kaishiriqi,jieshuriqi,code,'spxtln'
     FROM T599;
 
 END

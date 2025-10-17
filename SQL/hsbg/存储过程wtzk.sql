@@ -139,8 +139,8 @@ BEGIN
         INNER JOIN T503 AS B ON A.code = B.code
         WHERE B.pctChg > 0 AND B.di/A.di-1 < 0.20
     )
-    INSERT INTO T10000([kaishiriqi],[jieshuriqi],[code])
-    SELECT DISTINCT kaishiriqi,jieshuriqi,code
+    INSERT INTO T10000([kaishiriqi],[jieshuriqi],[code],[name])
+    SELECT DISTINCT kaishiriqi,jieshuriqi,code,'spwtzk'
     FROM T599;
 
 END

@@ -174,8 +174,8 @@ BEGIN
     )
 
     -- 插入结果
-    INSERT INTO T10000 ([kaishiriqi], [jieshuriqi], [code])
-    SELECT DISTINCT kaishiriqi, jieshuriqi, code
+    INSERT INTO T10000 ([kaishiriqi], [jieshuriqi], [code],[name])
+    SELECT DISTINCT kaishiriqi, jieshuriqi, code,'spqfdl'
     FROM T599;
 
     PRINT '✅ 执行完成，结果写入 T10000';

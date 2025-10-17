@@ -154,12 +154,13 @@ BEGIN
 	AND     C.kai>B.kai 
  
 		AND   IIF(C.[pctChg]<0, C.shou, C.kai)  /1.02<b.kai
-		B.pctChg>0 AND A.shou<B.shou AND A.di<B.di AND B.val<0
+		AND  B.pctChg>0 AND A.shou<B.shou AND A.di<B.di AND B.val<0
           AND ((C.pctChg<0 AND B.shou>C.maxval AND B.kai<C.shou)
             OR (C.pctChg>0 AND B.shou>C.maxval AND B.kai<C.kai))
     )
-    INSERT INTO T10002([kaishiriqi],[jieshuriqi],[code])
-    SELECT DISTINCT kaishiriqi,jieshuriqi,code FROM T599;
+    INSERT INTO T10002([kaishiriqi],[jieshuriqi],[code],[name])
+    SELECT DISTINCT kaishiriqi,jieshuriqi,code,'sptqly' 
+	FROM T599;
 
 END
 GO
